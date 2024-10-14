@@ -165,7 +165,7 @@ It allows the multihomed host to select the source address correctly: when two r
 
 <t>
 In case of renumbering if both old and new prefixes are advertized by the same router (received from a router with the same link-local address), then Rule 5.5 doesn't help selecting the correct (working) source address.
-However if the prefix change also leads to the default router address change, then a host implementing Rule 5.5 could recover from the renumbering quickly:
+However, if the prefix change also leads to the default router address change, then a host implementing Rule 5.5 could recover from the renumbering quickly:
 </t>
 
 <ul>
