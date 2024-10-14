@@ -165,10 +165,10 @@ It allows the multihomed host to select the source address correctly: when two r
 
 <t>
 In case of renumbering if both old and new prefixes are advertized by the same router (received from a router with the same link-local address), then Rule 5.5 doesn't help selecting the correct (working) source address.
-However, if the prefix change also leads to the default router address change, then a host implementing Rule 5.5 could recover from the renumbering quickly:
+However, if the prefix change also leads to the default router address change, then a host implementing Rule 5.5 could recover from the renumbering quickly, i.e.:
 </t>
 
-<ul>
+<ol>
 <li>
 <t>
 The host receives an RA from the router (link-local address LLA_A) with a PIO  containing pref_a, forms IPv6 addresses from that prefix using SLAAC.
@@ -201,7 +201,7 @@ The host is using LLA_B as a next-hop for outgoing traffic, so addresses from th
 </li>
 
 
-</ul>
+</ol>
 
 <t>
 It should be noted that <xref target="RFC6724"/> does not require all implementations to support Rule 5.5, limiting the support to systems which track which router advertized which prefix. However <xref target="I-D.ietf-6man-rfc6724-update"/> elevates Rule 5.5 support to MUST for all systems.
