@@ -191,7 +191,7 @@ The host receives an RA from the router (link-local address LLA_B) with a new PI
 <li>
 <t>
 Link-local address LLA_A is not reachable anymore, as the host changes the network attachment point.
-Neighbor Unreachability Detection (<xref target="RFC4861"/>) detects it and removes LLA_A from the list of default routers.
+Neighbor Unreachability Detection (<xref target="RFC4861"/>) detects that the next-hop is no longer reachable, and removes LLA_A from the list of default routers.
 </t>
 </li>
 <li>
