@@ -123,6 +123,7 @@ the title) for use on http://www.rfc-editor.org/search.html. -->
 <t>DHCPv6-PD: DHCPv6 Prefix Delegation <xref target="RFC8415"/>; a mechanism to delegate IPv6 prefixes to clients.</t>
 <t>Flash renumbering: a network renumbering event, when an old prefix, used to address hosts, becomes invalid and is replaced by a new prefix. Before the flash renumbering only the old prefix provides connectivity, and after the flash renumbering only the new one can be used. In other words, there is no period of time when addresses from both prefixes provide connectivity. Examples of flash renumbering include, but are not limited to a change of prefix delegated via DHCPv6-PD, or removal of one prefix from the router configuration and replacing it with another.</t>
 <t>PIO: Prefix Information Option, <xref target="RFC4861"/>.</t>
+<t>RA: Router Advertisement, <xref target="RFC4861"/>.</t>
 <t>SLAAC: IPv6 Stateless Address AutoConfugration, <xref target="RFC4862"/>.</t>
 <t>SLAAC Router: a router which advertizes at least one prefix in a PIO with the A flag set to 1, so that prefix can be used for SLAAC.</t>
 </list>
@@ -171,7 +172,7 @@ However, if the prefix change also leads to the default router address change, t
 <ol>
 <li>
 <t>
-The host receives an RA from the router (link-local address LLA_A) with a PIO  containing pref_a, forms IPv6 addresses from that prefix using SLAAC.
+The host receives a Router Advertisement (RA, <xref target="RFC4861"/>) from the router (link-local address LLA_A) with a PIO  containing pref_a, forms IPv6 addresses from that prefix using SLAAC.
 </t>
 </li>
 
