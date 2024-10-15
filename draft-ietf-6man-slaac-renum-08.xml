@@ -505,7 +505,7 @@ The router SHOULD also follow recommendations from Section 6.2.8 of <xref target
 </t>
 
 <t>
-That functionality SHOULD be configurable. A routers supporting this functionality SHOULD enable it on an interface if AdvPrefixList contains any prefixes obtained via DHCPv6-PD. In all other cases this functionality SHOULD be disabled by default unless explictly enabled by the administrator.
+That functionality SHOULD be configurable. A routers supporting this functionality SHOULD enable it on an interface if AdvPrefixList contains any prefixes obtained dynamically (e.g. via DHCPv6-PD). In all other cases this functionality SHOULD be disabled by default unless explictly enabled by the administrator.
 </t>
 
 <t>
@@ -569,7 +569,7 @@ Using the link-local address to uniquely identify routers on the link has the be
 </t>
 <t>
 Using the link-local address to uniquely identify routers on the link has the benefit that the address a router is known by should not change when a site renumbers and the renumbering event is explicitly signalled and properly propagated to all hosts.
-However, in case of flash renumbering without explicit signalling changing the router link-local address during the renumbering ([draft-ietf-6man-slaac-renum]) helps hosts to detect prefix changes and update their configuration accordingly.
+However, in case of flash renumbering without explicit signalling the router SHOULD be able change the link-local address of an interface following renumbering events, to help hosts detect prefix changes and update their configuration accordingly.
 </t>
 <t>
 ===
