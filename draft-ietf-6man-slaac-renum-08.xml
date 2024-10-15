@@ -505,7 +505,9 @@ The router SHOULD also follow recommendations from Section 6.2.8 of <xref target
 </t>
 
 <t>
-That functionality SHOULD be configurable. Routers supporting this functionality SHOULD enable it on an interface if AdvPrefixList contains any prefixes obtained dynamically (e.g. via DHCPv6-PD). In all other cases this functionality SHOULD be disabled by default unless explictly enabled by the administrator.
+Prefix-specific link-local addresses functionality SHOULD be configurable.
+Routers supporting prefix-specific link-local addresses SHOULD enable it on an interface susceptible to flash renumbering, e.g., if AdvPrefixList contains prefixes obtained dynamically from DHCPv6-PD.
+In all other cases, prefix-specific link-local addresses SHOULD be disabled by default and MAY be enabled by the administrator.
 </t>
 
 <t>
