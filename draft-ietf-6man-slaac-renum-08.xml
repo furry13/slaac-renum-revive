@@ -505,7 +505,7 @@ The router SHOULD also follow recommendations from Section 6.2.8 of <xref target
 </t>
 
 <t>
-That functionality SHOULD be configurable. A routers supporting this functionality SHOULD enable it on an interface if AdvPrefixList contains any prefixes obtained dynamically (e.g. via DHCPv6-PD). In all other cases this functionality SHOULD be disabled by default unless explictly enabled by the administrator.
+That functionality SHOULD be configurable. Routers supporting this functionality SHOULD enable it on an interface if AdvPrefixList contains any prefixes obtained dynamically (e.g. via DHCPv6-PD). In all other cases this functionality SHOULD be disabled by default unless explictly enabled by the administrator.
 </t>
 
 <t>
