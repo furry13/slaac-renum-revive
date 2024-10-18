@@ -464,7 +464,8 @@ with:
 <t>
    If including all options causes the size of an advertisement to
    exceed the link MTU, multiple advertisements can be sent, each
-   containing a subset of the options.
+   containing a subset of the options. In that case the router SHOULD,
+whenever possible, split the information between minimal number of RAs.
 </t>
 </list>
 
