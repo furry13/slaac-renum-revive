@@ -126,6 +126,7 @@ the title) for use on http://www.rfc-editor.org/search.html. -->
 <t>PIO: Prefix Information Option, <xref target="RFC4861"/>.</t>
 <t>RA: Router Advertisement, <xref target="RFC4861"/>.</t>
 <t>SLAAC: IPv6 Stateless Address AutoConfugration, <xref target="RFC4862"/>.</t>
+<t>SLAAC host: a host which uses SLAAC to configure addresses. </t>
 <t>SLAAC Router: a router which advertizes at least one prefix in a PIO with the A flag set to 1, so that prefix can be used for SLAAC.</t>
 </list>
 
@@ -250,7 +251,7 @@ Neighbor Unreachability Detection detects that LLA_A is not reachable, and remov
 <t>In scenarios where a local router is aware of the renumbering event, it may try to phase out the stale network configuration information. In these scenarios, there are two aspects to be considered:
 <list style="symbols">
 <t>The amount of time during which the router should continue trying to deprecate the stale network configuration information.</t>
-<t>The ability of SLAAC-enabled hosts to phase out stale configuration.</t>
+<t>The ability of SLAAC hosts to phase out stale configuration.</t>
 </list>
 </t>
 
