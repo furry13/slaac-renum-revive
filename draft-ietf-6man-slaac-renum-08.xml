@@ -65,6 +65,18 @@ docName="draft-ietf-6man-slaac-renum-08">
     </author>
 
  
+<author initials="J." surname="Linkova" fullname="Jen Linkova">
+
+      <organization>Google</organization>
+
+      <address>
+
+        <email>furry13@gmail.com</email>
+        <email>furry@google.com</email>
+
+      </address>
+
+    </author>
 
     <date/>
 
@@ -92,7 +104,7 @@ the title) for use on http://www.rfc-editor.org/search.html. -->
 
 </section>
 
-<section title="Terminology" anchor="term">
+<section title="Requirements Language" anchor="rfc2119">
 
 
 
@@ -105,6 +117,20 @@ the title) for use on http://www.rfc-editor.org/search.html. -->
 </section>
 
 
+<section title="Terminology" anchor="term">
+
+<list style="symbols">
+<t>DHCPv6-PD: DHCPv6 Prefix Delegation <xref target="RFC8415"/>; a mechanism to delegate IPv6 prefixes to clients.</t>
+<t>Flash renumbering: a network renumbering event, when an old prefix, used to address hosts, becomes invalid and is replaced by a new prefix (or just removed, without any replacement). Before the flash renumbering only the old prefix provides connectivity, and after the flash renumbering only the new one can be used. In other words, there is no period of time when addresses from both prefixes provide connectivity. Examples of flash renumbering include, but are not limited to a change of prefix delegated via DHCPv6-PD, or removal of one prefix from the router configuration and replacing it with another. See <xref target="RFC8978"/> for more detailed discussion of various flash-renumbering scenarios.</t>
+<t>LLA: Link-Local Address, Section 2.5.6 of <xref target="RFC4291"/>.</t>
+<t>PIO: Prefix Information Option, <xref target="RFC4861"/>.</t>
+<t>RA: Router Advertisement, <xref target="RFC4861"/>.</t>
+<t>SLAAC: IPv6 Stateless Address AutoConfugration, <xref target="RFC4862"/>.</t>
+<t>SLAAC host: a host which uses SLAAC to configure addresses. </t>
+<t>SLAAC Router: a router which advertizes at least one prefix in a PIO with the A flag set to 1, so that prefix can be used for SLAAC.</t>
+</list>
+
+</section>
 <section title="SLAAC reaction to Flash-renumbering Events" anchor="problem">
 
 <t>In some flash-renumbering scenarios, the local router may try to deprecate the stale information by explicitly signaling the network about the renumbering event, whereas in other scenarios the renumbering event may happen inadvertently, without the router explicitly signaling the scenario to local hosts. The following subsections analyze specific considerations for each of these scenarios.</t>
@@ -129,7 +155,93 @@ the title) for use on http://www.rfc-editor.org/search.html. -->
 
 <t>Similarly, other Neighbor Discovery options employ long default lifetimes that are unacceptable for most deployment scenarios where flash-renumbering events may be experienced.  </t>
 
-<t>Use of more appropriate timers in Router Advertisement messages can help limit the amount of time that hosts will maintain stale configuration information. Thus, <xref target="timers"/> specifies more appropriate (i.e., shorter) default lifetimes for Neighbor Discovery options. <xref target="ras"/> provides recommendations about conveying Neighbor Discovery information into RA messages, to help hosts infer when information may have become stale.</t>
+<t>Use of more appropriate timers in Router Advertisement messages can help limit the amount of time that hosts will maintain stale configuration information. Thus, <xref target="timers"/> specifies more appropriate (i.e., shorter) default lifetimes for Neighbor Discovery options. 
+</t>
+
+<section anchor="gulla">
+<name>Default Address Selection Rule 5.5, Default Router Selection and Renumbering Without Explicit Signalling</name>
+
+<t>
+Rule 5.5 of the Default Source Address Selection (<xref target="RFC6724"/>) requires the host to prefer addresses in a prefix advertised by the next-hop.
+It allows the multihomed host to select the source address correctly: when two routers advertize different prefixes, the host will be sending packets with source address from a given prefix to the router the prefix was received from.
+</t>
+
+<t>
+In case of renumbering if both old and new prefixes are advertized by the same router (received from a router with the same link-local address), then Rule 5.5 doesn't help selecting the correct (working) source address.
+However, if the prefix change also leads to the default router address change, then a host implementing Rule 5.5 could recover from the renumbering quickly, i.e.:
+</t>
+
+<ol>
+<li>
+<t>
+The host receives a Router Advertisement (RA, <xref target="RFC4861"/>) from the router (link-local address LLA_A) with a PIO  containing pref_a, forms IPv6 addresses from that prefix using SLAAC.
+</t>
+</li>
+
+<li>
+<t>
+An IPv6 prefix configured on the link changes from pref_a to pref_b.
+The host does not receive any explicit signal about the prefix change and does not clear stale IPv6 configuration from its interface.
+</t>
+</li>
+
+<li>
+<t>
+The host receives an RA from the router (link-local address LLA_B) with a new PIO for  pref_b and forms new addresses from that prefix.
+</t>
+</li>
+
+<li>
+<t>
+Link-local address LLA_A is not reachable anymore, as the host changes the network attachment point.
+Neighbor Unreachability Detection (<xref target="RFC4861"/>) detects that the next-hop is no longer reachable, and removes LLA_A from the list of default routers.
+</t>
+</li>
+<li>
+<t>
+The host is using LLA_B as a next-hop for outgoing traffic, so addresses from the pref_b are selected, and addresses from pref_a are not used.
+</t>
+</li>
+
+
+</ol>
+
+<t>
+It should be noted that <xref target="RFC6724"/> does not require all implementations to support Rule 5.5, limiting the support to systems which track which router advertized which prefix. However <xref target="I-D.ietf-6man-rfc6724-update"/> elevates Rule 5.5 support to MUST for all systems.
+</t>
+
+<t>
+As per <xref target="RFC8028"/>, "A host SHOULD select default routers for each prefix it is assigned an address in.
+Routers that have advertised the prefix in their Router Advertisement message SHOULD be preferred over routers that do not advertise the prefix."
+If the host complies with <xref target="RFC8028"/>, then the proposed mechanism would work even better, and would provide fast recovery from a renumbering event:
+</t>
+<ul>
+<li>
+<t>
+The host selects a default router with link-local address LLA_A for pref_a.
+</t>
+</li>
+<li>
+<t>
+The prefix on the link changes from pref_a to pref_b.
+</t>
+</li>
+<li>
+<t>
+When the host receives an RA from LLA_B, containing a PIO for pref_b, the host selects another default gateway, LLA_B. 
+</t>
+</li>
+<li>
+<t>
+Neighbor Unreachability Detection detects that LLA_A is not reachable, and removes it from the neighbor cache table, so the host can not use it as a default gateway anymore. The host switches to using LLA_B as a default gateway and, in accordance with Rule 5.5, starts using addresses from pref_b.
+</t>
+</li>
+</ul>
+
+
+<t><xref target="ras"/> provides recommendations for routers generating prefix-specific link-local addresses, to help hosts infer when information may have become stale.</t>
+
+</section>
 
 </section>
 
@@ -379,9 +491,118 @@ The behavior described in <xref target="RFC4862"/> had been incorporated during
 </section>
 
 
+
+
+<section title="Prefix-Specific Link-Local Addresses on Router Interfaces" anchor="ras">
+<t>
+It is highly desirable, as discussed in <xref target="gulla"/>, to ensure that renumbering or any changes to the set of prefixes advertized in PIOs detected by hosts in timely manner. Therefore routers which support multiple link-local addresses per interface SHOULD support the following functionality:
+<list style="symbols">
+<t>Generating (using  <xref target="RFC7217"/> algorithm) or allowing the administrator to configure a dedicated link-local address for each prefix in AdvPrefixList (<xref target="RFC4861"/>);</t>
+<t>Sending a PIO for each prefix in a separate RA, using that dedicated link-local address as a source. When populating fields in each RA as per Section 6.2.3 of <xref target="RFC4861"/>, AdvPrefixList is treated as containing one specific prefix only.</t>
+<t>
+Removing the prefix-specific link-local address from the interface when the corresponding prefix is no longer advertized in a PIO sent from that interface.
+The router SHOULD also follow recommendations from Section 6.2.8 of <xref target="RFC4861"/> to inform hosts of this change.
+</t>
+</list>
+</t>
+
+<t>
+Prefix-specific link-local addresses functionality SHOULD be configurable.
+Routers supporting prefix-specific link-local addresses SHOULD enable it on an interface susceptible to flash renumbering, e.g., if AdvPrefixList contains prefixes obtained dynamically from DHCPv6-PD.
+In all other cases, prefix-specific link-local addresses SHOULD be disabled by default and MAY be enabled by the administrator.
+</t>
+
+<t>
+As discussed in Section 6.2.8 of <xref target="RFC4861"/>, using multiple link-local address for the same router on the same link may prevent hosts from processing ICMPv6 redirects sent by the router. Therefore, if a router has prefix-specific link-local addresses enabled on its interface, the router MUST select the correct source link-local address when sending ICMPv6 redirects on that interface. In particular, if the source address of the invoking packet belongs to a prefix advertized in a PIO on that interface, the router MUST use the link-local address specific to this prefix as a source address for the ICMPv6 redirects.
+</t>
+
+
+<t>
+To enable the proposed mechanism, this document introduces the following changes to Section 6.2.3 of <xref target="RFC4861"/>:
+</t>
+
+<t>
+OLD TEXT:
+</t>
+<t>
+===
+</t>
+<t>
+A router MAY choose not to include some or all options when sending unsolicited Router Advertisements. For example, if prefix lifetimes are much longer than AdvDefaultLifetime, including them every few advertisements may be sufficient. However, when responding to a Router Solicitation or while sending the first few initial unsolicited advertisements, a router SHOULD include all options so that all information (e.g., prefixes) is propagated quickly during system initialization.
+</t>
+<t>
+If including all options causes the size of an advertisement to exceed the link MTU, multiple advertisements can be sent, each containing a subset of the options.
+</t>
+<t>
+===
+</t>
+
+<t>
+NEW TEXT:
+</t>
+<t>
+===
+</t>
+<t>
+When sending Router Advertisements, a router SHOULD include all options into each RA. However if prefix-specific link-local addresses [draft-ietf-6man-slaac-renum] are enabled for the interface, the router SHOULD include one PIO into each RA, as described in [draft-ietf-6man-slaac-renum].
+If including all required options would cause the size of an advertisement to exceed the link MTU, multiple advertisements can be sent, each containing a subset of the options. 
+</t>
+<t>
+===
+</t>
+
+<t>
+This document also modifies Section 6.2.8 of <xref target="RFC4861"/>:
+</t>
+<t>
+===
+</t>
+<t>OLD TEXT:</t>
+<t>
+===
+</t>
+<t>
+Using the link-local address to uniquely identify routers on the link has the benefit that the address a router is known by should not change when a site renumbers.
+</t>
+<t>
+===
+</t>
+<t>NEW TEXT:</t>
+<t>
+===
+</t>
+<t>
+Using the link-local address to uniquely identify routers on the link has the benefit that the address a router is known by should not change when a site renumbers and the renumbering event is explicitly signalled and properly propagated to all hosts.
+However, in case of flash renumbering without explicit signalling the router SHOULD be able change the link-local address of an interface following renumbering events, to help hosts detect prefix changes and update their configuration accordingly.
+</t>
+<t>
+===
+</t>
+
+
+<t>
+<list style="hanging">
+<t hangText="RATIONALE:">
+<list style="symbols">
+<t>
+As discussed in <xref target="gulla"/>, sending each PIO in a dedicated RA using a prefix-specific link-local address as a source address can help hosts to detect changes in a list of prefixes advertized on a given link.
+However, this approach increases number of RAs sent periodically and in response to Router Solicitations.
+Managed networks, where advertized prefixes are configured statically by administrators, are less likely to experience flash renumbering without explicit signalling.
+Networks which benefit most from the prefix-specific link-local addresses approach are ones using DHCPv6-PD,  where prefixes can change suddenly, after link flap or a router reboot.
+Therefore this document recommends enabling prefix-specific link-local address by default only if PIO prefixes are obtained via DHCPv6-PD.
+</t>
+<t>
+Including all options when sending RAs leads to simpler code (as opposed to dealing with special cases where specific information is intentionally omitted), and also helps hosts infer when they have received a complete set of SLAAC configuration information.
+Note that while <xref target="RFC4861"/> allowed some RAs to omit some options, to the best of the authors' knowledge, all SLAAC router implementations always send all options in the smallest possible number of packets. Therefore, this section simply aligns the protocol specifications with existing implementation practice.
+</t>
+</list>
+</t>
+</list>
+</t>
+
+</section>
+
 <section title="Interface Initialization" anchor="init">
-
-
 
 <t>When an interface is initialized or reconfigured, it is paramount that network configuration information is propagated on the corresponding network in a timely manner. Thus, this document replaces the following text from Section 6.2.4 of <xref target="RFC4861"/>:
 <list style="hanging">
@@ -409,64 +630,6 @@ with:
 <t hangText="RATIONALE:">
 <list style="symbols">
 <t>Use of stale information can lead to interoperability problems. Therefore, it is important that new configuration information propagates in a timelier manner to all hosts.</t>
-</list>
-</t>
-</list>
-</t>
-
-
-
-
-</section>
-
-
-<section title="Conveying Information in Router Advertisement (RA) Messages" anchor="ras">
-
-<t>Intentionally omitting information in Router Advertisements may prevent the propagation of such information, and may represent a challenge for hosts that need to infer whether they have received a complete set of SLAAC configuration information. As a result, this section recommends that, to the extent that is possible, RA messages contain a complete set of SLAAC information.
-</t>
-
-<t>This document replaces the following text from Section 6.2.3 of <xref target="RFC4861"/>:
-<list style="hanging">
-
-<t>
-   A router MAY choose not to include some or all options when sending
-   unsolicited Router Advertisements.  For example, if prefix lifetimes
-   are much longer than AdvDefaultLifetime, including them every few
-   advertisements may be sufficient.  However, when responding to a
-   Router Solicitation or while sending the first few initial
-   unsolicited advertisements, a router SHOULD include all options so
-   that all information (e.g., prefixes) is propagated quickly during
-   system initialization.</t>
-
-<t>
-   If including all options causes the size of an advertisement to
-   exceed the link MTU, multiple advertisements can be sent, each
-   containing a subset of the options.
-</t>
-</list>
-
-with:
-
-<list style="hanging">
-
-<t>
-   When sending Router Advertisements, a router SHOULD include all 
-   options.</t>
-<t>
-   If including all options would cause the size of an advertisement 
-   to exceed the link MTU, multiple advertisements can be sent, each
-   containing a subset of the options. In all cases, routers SHOULD
-   convey all information using the smallest possible number of 
-   packets, and SHOULD convey options of the same type in the same 
-   packet to the extent possible.
-</t>
-</list>
-</t>
-<t>
-<list style="hanging">
-<t hangText="RATIONALE:">
-<list style="symbols">
-<t>Sending information in the smallest possible number of packets was somewhat already implied by the original text in <xref target="RFC4861"/>. Including all options when sending RAs leads to simpler code (as opposed to dealing with special cases where specific information is intentionally omitted), and also helps hosts infer when they have received a complete set of SLAAC configuration information. Note that while <xref target="RFC4861"/> allowed some RAs to omit some options, to the best of the authors' knowledge, all SLAAC router implementations  always send all options in the smallest possible number of packets. Therefore, this section simply aligns the protocol specifications with existing implementation practice.</t>
 </list>
 </t>
 </list>
@@ -578,7 +741,7 @@ This document has no actions for IANA.
 
 
 <section title="Acknowledgments">
-<t>The authors would like to thank (in alphabetical order) Mikael Abrahamsson, Tore Anderson, Luis Balbinot, Brian Carpenter, Lorenzo Colitti, Owen DeLong, Gert Doering, Thomas Haller, Nick Hilliard, Bob Hinden, Philip Homburg, Lee Howard, Christian Huitema, Tatuya Jinmei, Erik Kline, Ted Lemon, Jen Linkova, Albert Manfredi, Roy Marples, Florian Obser, Jordi Palet Martinez, Michael Richardson, Hiroki Sato, Mark Smith, Hannes Frederic Sowa, Dave Thaler, Tarko Tikan, Ole Troan, Eduard Vasilenko, and Loganaden Velvindron, for providing valuable comments on earlier versions of this document.</t>
+<t>The authors would like to thank (in alphabetical order) Mikael Abrahamsson, Tore Anderson, Luis Balbinot, Brian Carpenter, Lorenzo Colitti, Owen DeLong, Gert Doering, Thomas Haller, Nick Hilliard, Bob Hinden, Philip Homburg, Lee Howard, Christian Huitema, Tatuya Jinmei, Erik Kline, Ted Lemon, Albert Manfredi, Roy Marples, Florian Obser, Jordi Palet Martinez, Michael Richardson, Hiroki Sato, Mark Smith, Hannes Frederic Sowa, Dave Thaler, Tarko Tikan, Ole Troan, Eduard Vasilenko, and Loganaden Velvindron, for providing valuable comments on earlier versions of this document.</t>
 
 <t>Fernando would like to thank Alejandro D'Egidio and Sander Steffann for a discussion of these issues, which led to the publication of <xref target="RFC8978"/>, and eventually to this document.</t>
 <t>Fernando would also like to thank Brian Carpenter who, over the years, has answered many questions and provided valuable comments that has benefited his protocol-related work.</t>
@@ -591,9 +754,13 @@ This document has no actions for IANA.
     <references title="Normative References">
 	<?rfc include="reference.RFC.2119" ?>
  
+	<?rfc include="reference.RFC.4291" ?>
 	<?rfc include="reference.RFC.4861" ?>
 	<?rfc include="reference.RFC.4862" ?>
+	<?rfc include="reference.RFC.6724" ?>
+	<?rfc include="reference.RFC.7217" ?>
 	<?rfc include="reference.RFC.7772" ?>
+	<?rfc include="reference.RFC.8028" ?>
 	<?rfc include="reference.RFC.8174" ?>
 
 	</references>
@@ -608,6 +775,10 @@ This document has no actions for IANA.
 	
 	<!-- SEND -->
 	<?rfc include="reference.RFC.3971" ?>
+	<?rfc include="reference.RFC.8415" ?>
+	<?rfc include="reference.I-D.ietf-6man-rfc6724-update" ?>
+
+        
 
 	<reference anchor="IPNG-minutes" target="https://www.ietf.org/proceedings/38/97apr-final/xrtftr47.htm">
 		<front>
