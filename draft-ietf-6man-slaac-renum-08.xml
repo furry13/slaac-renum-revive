@@ -218,10 +218,10 @@ The following subsections update <xref target="RFC4191"/>, <xref target="RFC4861
 
 <list style="symbols">
 <t>Reduce the default lifetimes of Neighbor Discovery options (<xref target="timers"/>): 
-<vspace blankLines="0" />This helps limit the amount of time a host may employ stale information, and also limits the amount of time a router should to try to deprecate stale information.</t>
+<vspace blankLines="0" />This helps limit the amount of time a host may employ stale information, and also limits the amount of time a router should try to deprecate stale information.</t>
 
 <t>Signal Stale Configuration Information (<xref target="sig-stale-config-2"/>): 
-<vspace blankLines="0" />This allows local hosts to learn about stale configuration information.</t>
+<vspace blankLines="0" />This allows local hosts to learn about stale configuration information in a timelier manner.</t>
 <t>Honor PIOs with small Valid Lifetimes (<xref target="sig-stale-config"/>): 
 <vspace blankLines="0" />This allows hosts to honor PIOs with a Valid Lifetime less than 2 hours, thus resulting in a timelier reaction to flash-renumbering events.</t>
 <t>Recommend routers to retransmit configuration information upon interface initialization/reconfiguration (<xref target="init"/>): 
@@ -271,7 +271,8 @@ The following subsections update <xref target="RFC4191"/>, <xref target="RFC4861
 ND_DEFAULT_PREFERRED_LIFETIME is set to AdvDefaultLifetime, on the premise that the "Preferred Lifetime" of a Neighbor Discovery option should not span past the "Router Lifetime" of the router that is advertising the option. The expression above computes of maximum among AdvDefaultLifetime and "ND_RAS_PREFERRED * MaxRtrAdvInterval", to accommodate the case where an operator might simply want to disable one local router for maintenance, while still having the router advertise SLAAC configuration information.
 </t>
 -->
-<t>ND_RAS_PREFERRED and ND_RAS_VALID should be computed with the expression: n &gt;= ln(1 - P)/ln(Loss), where P represents the desired probability of receiving at least one RA for an RA loss rate of "Loss". This expression is further discussed in <xref target="expression"/>.
+<t hangText="NOTES:"><vspace blankLines="0" />
+ND_RAS_PREFERRED and ND_RAS_VALID should be computed with the expression: n &gt;= ln(1 - P)/ln(Loss), where P represents the desired probability of receiving at least one RA for an RA loss rate of "Loss". This expression is further discussed in <xref target="expression"/>.
 </t>
 <t>ND_RAS_PREFERRED defaults to 3. We note that for e.g. for an RA loss rate of 50% (Loss=0.50), this would result in a probability hosts refreshing this timer before it expires of 0.87500. We note that if the Preferred Lifetime expires, and the host has configured addresses for other prefixes, it will start preferring those other addresses instead. On the other hand, if the host has not configured addresses for other prefixes, it may still employ addresses even if they are not "Preferred" (please see Section 5.5.4 of <xref target="RFC4862"/>). Implementations MAY override the default value of ND_RAS_PREFERRED according to the considerations in <xref target="expression"/>.
 </t>
@@ -310,19 +311,19 @@ This is to align the Router Lifetime with the recommendations in <xref target="R
 
 <t>This document formally updates <xref target="RFC4191"/> to specify the default Route Lifetime of Route Information Options (RIOs) as follows:
 <list style="symbols">
-<t>Route Lifetime: Default: ND_DEFAULT_VALID_LIFETIME</t>
+<t>Route Lifetime: It defaults to ND_DEFAULT_VALID_LIFETIME</t>
 </list>
 </t>
 
 <t>This document formally updates <xref target="RFC8106"/> to modify the default Lifetime of Recursive DNS Server Options as:
 <list style="symbols">
-<t>Lifetime: Default: ND_DEFAULT_VALID_LIFETIME</t>
+<t>Lifetime: It defaults to ND_DEFAULT_VALID_LIFETIME</t>
 </list>
 </t>
 
 <t>Additionally, this document formally updates <xref target="RFC8106"/> to modify the default Lifetime of DNS Search List Options as:
 <list style="symbols">
-<t>Lifetime: Default: ND_DEFAULT_VALID_LIFETIME</t>
+<t>Lifetime: It defaults to ND_DEFAULT_VALID_LIFETIME</t>
 </list>
 </t>
 
@@ -333,7 +334,7 @@ This is to align the Router Lifetime with the recommendations in <xref target="R
 <section title="Signaling Stale Configuration Information" anchor="sig-stale-config-2">
 
 
-<t>In some scenarios, a SLAAC router may learn that previously advertised information has become stale. For example, this may happen when e.g. the advertised information is derived from information that has been dynamically learned from an upstream router via DHCPv6-PD, but the upstream router is no longer in use or available. In such scenarios, it is paramount that SLAAC signal the SLAAC configuration information change, to aid hosts in quickly phasing out the stale network configuration information.</t>
+<t>In some scenarios, a SLAAC router may learn that previously advertised information has become stale. For example, this may happen when e.g. the advertised information is derived from information that has been dynamically learned from an upstream router via DHCPv6-PD, but the upstream router is no longer in use or available. In such scenarios, it is paramount that the SLAAC router signals the SLAAC configuration information change, to aid hosts in quickly phasing out the stale network configuration information.</t>
 <t>SLAAC routers MUST signal stale configuration information by following the guidelines in Section 3.5 ("Signaling Stale Configuration Information") of <xref target="RFC9096"/>.
 </t>
 
