@@ -117,15 +117,32 @@ the title) for use on http://www.rfc-editor.org/search.html. -->
 </section>
 
 <section title="Terminology" anchor="term">
-<list style="symbols">
-<t>DHCPv6-PD: DHCPv6 Prefix Delegation <xref target="RFC8415"/>; a mechanism to delegate IPv6 prefixes to clients.</t>
-<t>Flash renumbering: a network renumbering event, when an old prefix, used to address hosts, becomes invalid and is replaced by a new prefix. Before the flash renumbering only the old prefix provides connectivity, and after the flash renumbering only the new one can be used. In other words, there is no period of time when addresses from both prefixes provide connectivity. Examples of flash renumbering include, but are not limited to a change of prefix delegated via DHCPv6-PD, or removal of one prefix from the router configuration and replacing it with another. See <xref target="RFC8978"/> for more detailed discussion of various flash-renumbering scenarios.</t>
-<t>PIO: Prefix Information Option, <xref target="RFC4861"/>.</t>
-<t>RA: Router Advertisement, <xref target="RFC4861"/>.</t>
-<t>SLAAC: IPv6 Stateless Address AutoConfugration, <xref target="RFC4862"/>.</t>
-<t>SLAAC host: a host which uses SLAAC to configure addresses. </t>
-<t>SLAAC Router: a router which advertizes at least one prefix in a PIO with the A flag set to 1, so that prefix can be used for SLAAC.</t>
+
+<list style="hanging">
+<t hangText="DHCPv6-PD:">
+<vspace blankLines="0" />DHCPv6 Prefix Delegation <xref target="RFC8415"/>; a mechanism to delegate IPv6 prefixes to clients.
+</t>
+<t hangText="Flash renumbering:">
+<vspace blankLines="0" />A network renumbering event, when an old prefix, used to address hosts, becomes invalid and is replaced by a new prefix. Before the flash renumbering event only the old prefix provides connectivity, and after the flash renumbering only the new one can be used. In other words, there is no period of time when addresses from both prefixes provide connectivity. See <xref target="RFC8978"/> for more detailed discussion of various flash-renumbering scenarios. Note: typically, when flash-renumbering events occur, other IPv6 netowrk configuration information (such as Recursive DNS Server (RDNSS) information <xref target="RFC8106"/>) is affected in the same manner, and thus the term "flash-renumbering" is also employed to refer to a more general "flash-reconfiguration" event.
+</t>
+<t hangText="PIO:">
+<vspace blankLines="0" />Prefix Information Option, <xref target="RFC4861"/>,
+</t>
+<t hangText="RA:">
+<vspace blankLines="0" />Router Advertisement, <xref target="RFC4861"/>.
+</t>
+<t hangText="SLAAC:">
+<vspace blankLines="0" />IPv6 Stateless Address AutoConfugration, <xref target="RFC4862"/>.
+</t>
+<t hangText="SLAAC host:">
+<vspace blankLines="0" />A host which employs SLAAC for IPv6 network configuration.
+</t>
+<t hangText="SLAAC Router:">
+<vspace blankLines="0" />A IPv6 router that advertises configuration information via SLAAC.
+</t>
 </list>
+
+
 </section>
 
 <section title="SLAAC reaction to Flash-renumbering Events" anchor="problem">
@@ -319,28 +336,6 @@ This is to align the Router Lifetime with the recommendations in <xref target="R
 <t>In some scenarios, a SLAAC router may learn that previously advertised information has become stale. For example, this may happen when e.g. the advertised information is derived from information that has been dynamically learned from an upstream router via DHCPv6-PD, but the upstream router is no longer in use or available. In such scenarios, it is paramount that SLAAC signal the SLAAC configuration information change, to aid hosts in quickly phasing out the stale network configuration information.</t>
 <t>SLAAC routers MUST signal stale configuration information by following the guidelines in Section 3.5 ("Signaling Stale Configuration Information") of <xref target="RFC9096"/>.
 </t>
-
-<!--
-
-<t>In order to detect SLAAC configuration changes across system bootstrapping events, SLAAC routers SHOULD record, on stable storage, the configuration information advertised on each interface, including the associated timer values.
-<list style="hanging">
-<t hangText="NOTE:">In the most simple scenarios, the advertised information will correspond to the SLAAC configuration information for the router, and hence no extra information will need to be recorded on stable storage. However, in scenarios where a SLAAC router advertises information that is derived from e.g. infformation dynicamically learned from an upstream router via DHCPv6-PD, this extra information will need to be recorded on stable storage.</t>
-</t>
-</list>
-</t>
-
-<t>
-Upon changes to the information that should be advertised by a SLAAC router, and after bootstrapping, a SLAAC router SHOULD proceed as follows:
-
-<list style="symbols">
-<t>SLAAC routersAny previously-advertised SLAAC information that is known to have become invalid, should be advertised on the same interface, but with appropriate lifetime values.</t>
-
-<t>The corresponding advertisements SHOULD be performed for at least the remaining "lifetime" of the information in question.</t> 
-
-<t>SLAAC routers SHOULD advertise this information with unsolicited Router Advertisement messages, as described inSection 6.2.4 of <xref target="RFC4861"/>, and MAY advertise this information via unicast Router Advertisement messages when possible and applicable.</t>
-</list>
-</t>
--->
 
 
 
