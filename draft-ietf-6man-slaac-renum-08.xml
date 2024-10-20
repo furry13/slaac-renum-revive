@@ -417,7 +417,7 @@ with:
 
 <list style="hanging">
 <t>
-   In such cases, the router SHOULD transmit 
+   In such cases, the router MUST transmit 
    MAX_INITIAL_RTR_ADVERTISEMENTS unsolicited advertisements, using the
    same rules as when an interface becomes an advertising interface.
 </t>
