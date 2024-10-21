@@ -471,18 +471,15 @@ with:
 
 <t>
 A router SHOULD include all options in a single Router Advertisement.
-However there are scenarios when routers MAY split the information between multiple RAs.
+However, there are scenarios when routers MAY split the information between multiple RAs.
 In particular:
 <list style="symbols">
 <t>
-Routers MAY send information associated with different provisional domains <xref target="RFC7556"/> in different RAs.
-Similarly, router MAY be explicitly or impliclty configured to send multiple RAs and split information between them.
-For example, an administrar might configure a VRRPv3 <xref target="RFC9568"/> router to send multiple RAs, one per VRRP group.
+Routers MAY be explicitly or implicitly configured to send multiple RAs and split information between them. For example, a router could be configured to send information associated with different provisional domains <xref target="RFC7556"/> in different RAs, or to send multiple RAs, one per VRRPv3 <xref target="RFC9568"/> group.
 </t>
 <t>
-Including all options can cause the size of an advertisement to exceed the link MTU.
-In that case multiple advertisements SHOULD be sent, each containing a subset of the options.
-Routers SHOULD whenever possible, split the information between minimal number of RAs.
+If including all options causes the size of an RA to exceed the link MTU, multiple RAs SHOULD be sent, each containing a subset of the options.
+Routers SHOULD whenever possible, split the information between the fewest possible number of RAs.
 </t>
 </list>
 </t>
