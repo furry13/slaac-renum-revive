@@ -470,20 +470,19 @@ with:
 <list style="hanging">
 
 <t>
-   When sending Router Advertisements, a router SHOULD include all 
-   options. If including all options would cause the size of an advertisement 
-   to exceed the link MTU, multiple advertisements can be sent, each
-   containing a subset of the options. In all cases, routers SHOULD
-   convey all information using the smallest possible number of 
-   packets, and SHOULD convey options of the same type in the same 
-   packet to the extent possible.
-</t>
-
+A router SHOULD include all options in a single Router Advertisement.
+However there are scenarios when routers MAY split the information between multiple RAs.
+In particular:
+<list style="symbols">
 <t>
-<list style="hanging">
-<t hangText="NOTE:"><vspace blankLines="0" />
-Routers MAY send information associated with different provisional domains <xref target="RFC7556"/> in different RAs. 
-Similarly, a VRRPv3 <xref target="RFC9568"/> router MAY be configured to send multiple RAs, one per VRRP group.
+Routers MAY send information associated with different provisional domains <xref target="RFC7556"/> in different RAs.
+Similarly, router MAY be explicitly or impliclty configured to send multiple RAs and split information between them.
+For example, an administrar might configure a VRRPv3 <xref target="RFC9568"/> router to send multiple RAs, one per VRRP group.
+</t>
+<t>
+Including all options can cause the size of an advertisement to exceed the link MTU.
+In that case multiple advertisements SHOULD be sent, each containing a subset of the options.
+Routers SHOULD whenever possible, split the information between minimal number of RAs.
 </t>
 </list>
 </t>
@@ -496,7 +495,7 @@ Similarly, a VRRPv3 <xref target="RFC9568"/> router MAY be configured to send mu
 <list style="symbols">
 <t>Sending information in the smallest possible number of packets was somewhat already implied by the original text in <xref target="RFC4861"/>. Including all options when sending RAs leads to simpler code (as opposed to dealing with special cases where specific information is intentionally omitted), helps hosts infer when they have received a complete set of SLAAC configuration information, and reduces the probability of hosts learning only a partial subset of SLAAC configuration information. Note that while <xref target="RFC4861"/> allowed some RAs to omit some options, to the best of the authors' knowledge, all SLAAC router implementations  always send all options in the smallest possible number of packets. Therefore, this section simply aligns the protocol specifications with existing implementation practice.</t>
 <t>
-However in some scenarios (including, but limited to multihoming or having a router providing information from multiple configuration or provisional domains (PvD) to non-PvD-aware hosts) it might be desirable to send multiple sets of network configuration information in multiple RAs.
+However in some scenarios (including, but not limited to multihoming or having a router providing information from multiple configuration or provisional domains (PvD) to non-PvD-aware hosts) it might be desirable to send multiple sets of network configuration information in multiple RAs.
 </t>
 </list>
 </t>
