@@ -64,6 +64,18 @@ docName="draft-ietf-6man-slaac-renum-08">
 
     </author>
 
+<author initials="J." surname="Linkova" role="editor" fullname="Jen Linkova">
+
+      <organization>Google</organization>
+
+      <address>
+
+        <email>furry13@gmail.com</email>
+        <email>furry@google.com</email>
+
+      </address>
+
+    </author>
  
 
     <date/>
@@ -92,7 +104,7 @@ the title) for use on http://www.rfc-editor.org/search.html. -->
 
 </section>
 
-<section title="Terminology" anchor="term">
+<section title="Requirements Language" anchor="rfc2119">
 
 
 
@@ -104,6 +116,34 @@ the title) for use on http://www.rfc-editor.org/search.html. -->
 
 </section>
 
+<section title="Terminology" anchor="term">
+
+<list style="hanging">
+<t hangText="DHCPv6-PD:">
+<vspace blankLines="0" />DHCPv6 Prefix Delegation <xref target="RFC8415"/>; a mechanism to delegate IPv6 prefixes to clients.
+</t>
+<t hangText="Flash renumbering:">
+<vspace blankLines="0" />A network renumbering event, when an old prefix, used to address hosts, becomes invalid and is replaced by a new prefix. Before the flash renumbering event only the old prefix provides connectivity, and after the flash renumbering only the new one can be used. In other words, there is no period of time when addresses from both prefixes provide connectivity. See <xref target="RFC8978"/> for more detailed discussion of various flash-renumbering scenarios. Note: typically, when flash-renumbering events occur, other IPv6 netowrk configuration information (such as Recursive DNS Server (RDNSS) information <xref target="RFC8106"/>) is affected in the same manner, and thus the term "flash-renumbering" is also employed to refer to a more general "flash-reconfiguration" event.
+</t>
+<t hangText="PIO:">
+<vspace blankLines="0" />Prefix Information Option, <xref target="RFC4861"/>,
+</t>
+<t hangText="RA:">
+<vspace blankLines="0" />Router Advertisement, <xref target="RFC4861"/>.
+</t>
+<t hangText="SLAAC:">
+<vspace blankLines="0" />IPv6 Stateless Address AutoConfugration, <xref target="RFC4862"/>.
+</t>
+<t hangText="SLAAC host:">
+<vspace blankLines="0" />A host which employs SLAAC for IPv6 network configuration.
+</t>
+<t hangText="SLAAC Router:">
+<vspace blankLines="0" />A IPv6 router that advertises configuration information via SLAAC.
+</t>
+</list>
+
+
+</section>
 
 <section title="SLAAC reaction to Flash-renumbering Events" anchor="problem">
 
@@ -178,10 +218,10 @@ The following subsections update <xref target="RFC4191"/>, <xref target="RFC4861
 
 <list style="symbols">
 <t>Reduce the default lifetimes of Neighbor Discovery options (<xref target="timers"/>): 
-<vspace blankLines="0" />This helps limit the amount of time a host may employ stale information, and also limits the amount of time a router should to try to deprecate stale information.</t>
+<vspace blankLines="0" />This helps limit the amount of time a host may employ stale information, and also limits the amount of time a router should try to deprecate stale information.</t>
 
 <t>Signal Stale Configuration Information (<xref target="sig-stale-config-2"/>): 
-<vspace blankLines="0" />This allows local hosts to learn about stale configuration information.</t>
+<vspace blankLines="0" />This allows local hosts to learn about stale configuration information in a timelier manner.</t>
 <t>Honor PIOs with small Valid Lifetimes (<xref target="sig-stale-config"/>): 
 <vspace blankLines="0" />This allows hosts to honor PIOs with a Valid Lifetime less than 2 hours, thus resulting in a timelier reaction to flash-renumbering events.</t>
 <t>Recommend routers to retransmit configuration information upon interface initialization/reconfiguration (<xref target="init"/>): 
@@ -231,7 +271,8 @@ The following subsections update <xref target="RFC4191"/>, <xref target="RFC4861
 ND_DEFAULT_PREFERRED_LIFETIME is set to AdvDefaultLifetime, on the premise that the "Preferred Lifetime" of a Neighbor Discovery option should not span past the "Router Lifetime" of the router that is advertising the option. The expression above computes of maximum among AdvDefaultLifetime and "ND_RAS_PREFERRED * MaxRtrAdvInterval", to accommodate the case where an operator might simply want to disable one local router for maintenance, while still having the router advertise SLAAC configuration information.
 </t>
 -->
-<t>ND_RAS_PREFERRED and ND_RAS_VALID should be computed with the expression: n &gt;= ln(1 - P)/ln(Loss), where P represents the desired probability of receiving at least one RA for an RA loss rate of "Loss". This expression is further discussed in <xref target="expression"/>.
+<t hangText="NOTES:"><vspace blankLines="0" />
+ND_RAS_PREFERRED and ND_RAS_VALID should be computed with the expression: n &gt;= ln(1 - P)/ln(Loss), where P represents the desired probability of receiving at least one RA for an RA loss rate of "Loss". This expression is further discussed in <xref target="expression"/>.
 </t>
 <t>ND_RAS_PREFERRED defaults to 3. We note that for e.g. for an RA loss rate of 50% (Loss=0.50), this would result in a probability hosts refreshing this timer before it expires of 0.87500. We note that if the Preferred Lifetime expires, and the host has configured addresses for other prefixes, it will start preferring those other addresses instead. On the other hand, if the host has not configured addresses for other prefixes, it may still employ addresses even if they are not "Preferred" (please see Section 5.5.4 of <xref target="RFC4862"/>). Implementations MAY override the default value of ND_RAS_PREFERRED according to the considerations in <xref target="expression"/>.
 </t>
@@ -270,19 +311,19 @@ This is to align the Router Lifetime with the recommendations in <xref target="R
 
 <t>This document formally updates <xref target="RFC4191"/> to specify the default Route Lifetime of Route Information Options (RIOs) as follows:
 <list style="symbols">
-<t>Route Lifetime: Default: ND_DEFAULT_VALID_LIFETIME</t>
+<t>Route Lifetime: It defaults to ND_DEFAULT_VALID_LIFETIME</t>
 </list>
 </t>
 
 <t>This document formally updates <xref target="RFC8106"/> to modify the default Lifetime of Recursive DNS Server Options as:
 <list style="symbols">
-<t>Lifetime: Default: ND_DEFAULT_VALID_LIFETIME</t>
+<t>Lifetime: It defaults to ND_DEFAULT_VALID_LIFETIME</t>
 </list>
 </t>
 
 <t>Additionally, this document formally updates <xref target="RFC8106"/> to modify the default Lifetime of DNS Search List Options as:
 <list style="symbols">
-<t>Lifetime: Default: ND_DEFAULT_VALID_LIFETIME</t>
+<t>Lifetime: It defaults to ND_DEFAULT_VALID_LIFETIME</t>
 </list>
 </t>
 
@@ -293,31 +334,9 @@ This is to align the Router Lifetime with the recommendations in <xref target="R
 <section title="Signaling Stale Configuration Information" anchor="sig-stale-config-2">
 
 
-<t>In some scenarios, a SLAAC router may learn that previously advertised information has become stale. For example, this may happen when e.g. the advertised information is derived from information that has been dynamically learned from an upstream router via DHCPv6-PD, but the upstream router is no longer in use or available. In such scenarios, it is paramount that SLAAC signal the SLAAC configuration information change, to aid hosts in quickly phasing out the stale network configuration information.</t>
+<t>In some scenarios, a SLAAC router may learn that previously advertised information has become stale. For example, this may happen when e.g. the advertised information is derived from information that has been dynamically learned from an upstream router via DHCPv6-PD, but the upstream router is no longer in use or available. In such scenarios, it is paramount that the SLAAC router signals the SLAAC configuration information change, to aid hosts in quickly phasing out the stale network configuration information.</t>
 <t>SLAAC routers MUST signal stale configuration information by following the guidelines in Section 3.5 ("Signaling Stale Configuration Information") of <xref target="RFC9096"/>.
 </t>
-
-<!--
-
-<t>In order to detect SLAAC configuration changes across system bootstrapping events, SLAAC routers SHOULD record, on stable storage, the configuration information advertised on each interface, including the associated timer values.
-<list style="hanging">
-<t hangText="NOTE:">In the most simple scenarios, the advertised information will correspond to the SLAAC configuration information for the router, and hence no extra information will need to be recorded on stable storage. However, in scenarios where a SLAAC router advertises information that is derived from e.g. infformation dynicamically learned from an upstream router via DHCPv6-PD, this extra information will need to be recorded on stable storage.</t>
-</t>
-</list>
-</t>
-
-<t>
-Upon changes to the information that should be advertised by a SLAAC router, and after bootstrapping, a SLAAC router SHOULD proceed as follows:
-
-<list style="symbols">
-<t>SLAAC routersAny previously-advertised SLAAC information that is known to have become invalid, should be advertised on the same interface, but with appropriate lifetime values.</t>
-
-<t>The corresponding advertisements SHOULD be performed for at least the remaining "lifetime" of the information in question.</t> 
-
-<t>SLAAC routers SHOULD advertise this information with unsolicited Router Advertisement messages, as described inSection 6.2.4 of <xref target="RFC4861"/>, and MAY advertise this information via unicast Router Advertisement messages when possible and applicable.</t>
-</list>
-</t>
--->
 
 
 
@@ -398,7 +417,7 @@ with:
 
 <list style="hanging">
 <t>
-   In such cases, the router SHOULD transmit 
+   In such cases, the router MUST transmit 
    MAX_INITIAL_RTR_ADVERTISEMENTS unsolicited advertisements, using the
    same rules as when an interface becomes an advertising interface.
 </t>
@@ -441,32 +460,40 @@ with:
 <t>
    If including all options causes the size of an advertisement to
    exceed the link MTU, multiple advertisements can be sent, each
-   containing a subset of the options.
+   containing a subset of the options. 
 </t>
 </list>
 
 with:
 
+
 <list style="hanging">
 
 <t>
-   When sending Router Advertisements, a router SHOULD include all 
-   options.</t>
+A router SHOULD include all options in a single Router Advertisement.
+However, there are scenarios when routers MAY split the information between multiple RAs.
+In particular:
+<list style="symbols">
 <t>
-   If including all options would cause the size of an advertisement 
-   to exceed the link MTU, multiple advertisements can be sent, each
-   containing a subset of the options. In all cases, routers SHOULD
-   convey all information using the smallest possible number of 
-   packets, and SHOULD convey options of the same type in the same 
-   packet to the extent possible.
+Routers MAY be explicitly or implicitly configured to send multiple RAs and split information between them. For example, a router could be configured to send information associated with different provisional domains <xref target="RFC7556"/> in different RAs, or to send multiple RAs, one per VRRPv3 <xref target="RFC9568"/> group.
+</t>
+<t>
+If including all options causes the size of an RA to exceed the link MTU, multiple RAs SHOULD be sent, each containing a subset of the options.
+Routers SHOULD whenever possible, split the information between the fewest possible number of RAs.
 </t>
 </list>
 </t>
+</list>
+</t>
+
 <t>
 <list style="hanging">
 <t hangText="RATIONALE:">
 <list style="symbols">
-<t>Sending information in the smallest possible number of packets was somewhat already implied by the original text in <xref target="RFC4861"/>. Including all options when sending RAs leads to simpler code (as opposed to dealing with special cases where specific information is intentionally omitted), and also helps hosts infer when they have received a complete set of SLAAC configuration information. Note that while <xref target="RFC4861"/> allowed some RAs to omit some options, to the best of the authors' knowledge, all SLAAC router implementations  always send all options in the smallest possible number of packets. Therefore, this section simply aligns the protocol specifications with existing implementation practice.</t>
+<t>Sending information in the smallest possible number of packets was somewhat already implied by the original text in <xref target="RFC4861"/>. Including all options when sending RAs leads to simpler code (as opposed to dealing with special cases where specific information is intentionally omitted), helps hosts infer when they have received a complete set of SLAAC configuration information, and reduces the probability of hosts learning only a partial subset of SLAAC configuration information. Note that while <xref target="RFC4861"/> allowed some RAs to omit some options, to the best of the authors' knowledge, all SLAAC router implementations  always send all options in the smallest possible number of packets. Therefore, this section simply aligns the protocol specifications with existing implementation practice.</t>
+<t>
+However in some scenarios (including, but not limited to multihoming or having a router providing information from multiple configuration or provisional domains (PvD) to non-PvD-aware hosts) it might be desirable to send multiple sets of network configuration information in multiple RAs.
+</t>
 </list>
 </t>
 </list>
@@ -578,7 +605,7 @@ This document has no actions for IANA.
 
 
 <section title="Acknowledgments">
-<t>The authors would like to thank (in alphabetical order) Mikael Abrahamsson, Tore Anderson, Luis Balbinot, Brian Carpenter, Lorenzo Colitti, Owen DeLong, Gert Doering, Thomas Haller, Nick Hilliard, Bob Hinden, Philip Homburg, Lee Howard, Christian Huitema, Tatuya Jinmei, Erik Kline, Ted Lemon, Jen Linkova, Albert Manfredi, Roy Marples, Florian Obser, Jordi Palet Martinez, Michael Richardson, Hiroki Sato, Mark Smith, Hannes Frederic Sowa, Dave Thaler, Tarko Tikan, Ole Troan, Eduard Vasilenko, and Loganaden Velvindron, for providing valuable comments on earlier versions of this document.</t>
+<t>The authors would like to thank (in alphabetical order) Mikael Abrahamsson, Tore Anderson, Luis Balbinot, Brian Carpenter, Lorenzo Colitti, Owen DeLong, Gert Doering, Thomas Haller, Nick Hilliard, Bob Hinden, Philip Homburg, Lee Howard, Christian Huitema, Tatuya Jinmei, Erik Kline, Ted Lemon,Albert Manfredi, Roy Marples, Florian Obser, Jordi Palet Martinez, Michael Richardson, Hiroki Sato, Mark Smith, Hannes Frederic Sowa, Dave Thaler, Tarko Tikan, Ole Troan, Eduard Vasilenko, and Loganaden Velvindron, for providing valuable comments on earlier versions of this document.</t>
 
 <t>Fernando would like to thank Alejandro D'Egidio and Sander Steffann for a discussion of these issues, which led to the publication of <xref target="RFC8978"/>, and eventually to this document.</t>
 <t>Fernando would also like to thank Brian Carpenter who, over the years, has answered many questions and provided valuable comments that has benefited his protocol-related work.</t>
@@ -593,6 +620,8 @@ This document has no actions for IANA.
  
 	<?rfc include="reference.RFC.4861" ?>
 	<?rfc include="reference.RFC.4862" ?>
+	<!-- PvD -->
+	<?rfc include="reference.RFC.7556" ?>
 	<?rfc include="reference.RFC.7772" ?>
 	<?rfc include="reference.RFC.8174" ?>
 
@@ -608,6 +637,10 @@ This document has no actions for IANA.
 	
 	<!-- SEND -->
 	<?rfc include="reference.RFC.3971" ?>
+	<!-- DHCPv6 -->
+	<?rfc include="reference.RFC.8415" ?>
+	<!-- VRRPv3 -->
+	<?rfc include="reference.RFC.9568" ?>
 
 	<reference anchor="IPNG-minutes" target="https://www.ietf.org/proceedings/38/97apr-final/xrtftr47.htm">
 		<front>
@@ -639,7 +672,6 @@ This document has no actions for IANA.
 
 	<?rfc include="reference.RFC.8978" ?>
 	<?rfc include="reference.RFC.9096" ?>
-
 
 
 	<reference anchor="dhcpcd" target="https://roy.marples.name/projects/dhcpcd/">
