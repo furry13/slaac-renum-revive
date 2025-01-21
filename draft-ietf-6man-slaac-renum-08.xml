@@ -402,7 +402,7 @@ The behavior described in <xref target="RFC4862"/> had been incorporated during
 
 
 
-<t>When an interface is initialized or reconfigured, it is paramount that network configuration information is propagated on the corresponding network in a timely manner. Thus, this document replaces the following text from Section 6.2.4 of <xref target="RFC4861"/>:
+<t>When the information contained in RAs changes (e.g. an interface is reconfigured), it is paramount that updated information is propagated to hosts connected to the corresponding network in a timely manner. Thus, this document replaces the following text from Section 6.2.4 of <xref target="RFC4861"/>:
 <list style="hanging">
 
 <t>
