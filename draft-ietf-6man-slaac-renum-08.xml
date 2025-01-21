@@ -961,6 +961,10 @@ P = 1 - (Loss)^n
             <td align="center">0.40</td>
             <td align="center">0.50</td>
             <td align="center">0.60</td>
+            <td align="center">0.70</td>
+            <td align="center">0.80</td>
+            <td align="center">0.90</td>
+            <td align="center">0.96</td>
           </tr>      
       	  <tr>
             <td align="center">3</td>
@@ -970,6 +974,10 @@ P = 1 - (Loss)^n
             <td align="center">0.93600</td>
             <td align="center">0.87500</td>
             <td align="center">0.78400</td>
+            <td align="center">0.65700</td>
+            <td align="center">0.48800</td>
+            <td align="center">0.27100</td>
+            <td align="center">0.14263</td>
           </tr> 
       	  <tr>
             <td align="center">4</td>
@@ -979,6 +987,10 @@ P = 1 - (Loss)^n
             <td align="center">0.97440</td>
             <td align="center">0.93750</td>
             <td align="center">0.87040</td>
+            <td align="center">0.75990</td>
+            <td align="center">0.59040</td>
+            <td align="center">0.34390</td>
+            <td align="center">0.18549</td>
           </tr> 
       	  <tr>
             <td align="center">5</td>
@@ -988,6 +1000,10 @@ P = 1 - (Loss)^n
             <td align="center">0.98976</td>
             <td align="center">0.96875</td>
             <td align="center">0.92224</td>
+            <td align="center">0.83193</td>
+            <td align="center">0.67232</td>
+            <td align="center">0.40951</td>
+            <td align="center">0.46856</td>
           </tr> 
       	  <tr>
             <td align="center">6</td>
@@ -997,6 +1013,10 @@ P = 1 - (Loss)^n
             <td align="center">0.99590</td>
             <td align="center">0.98437</td>
             <td align="center">0.95334</td>
+            <td align="center">0.88235</td>
+            <td align="center">0.73786</td>
+            <td align="center">0.46856</td>
+            <td align="center">0.26491</td>
           </tr> 
       	  <tr>
             <td align="center">7</td>
@@ -1006,6 +1026,10 @@ P = 1 - (Loss)^n
             <td align="center">0.99836</td>
             <td align="center">0.99219</td>
             <td align="center">0.97201</td>
+            <td align="center">0.91765</td>
+            <td align="center">0.79028</td>
+            <td align="center">0.52170</td>
+            <td align="center">0.30166</td>
           </tr> 
       	  <tr>
             <td align="center">8</td>
@@ -1015,6 +1039,10 @@ P = 1 - (Loss)^n
             <td align="center">0.99934</td>
             <td align="center">0.99609</td>
             <td align="center">0.98320</td>
+            <td align="center">0.94235</td>
+            <td align="center">0.83223</td>
+            <td align="center">0.56953</td>
+            <td align="center">0.33658</td>
           </tr> 
       	  <tr>
             <td align="center">9</td>
@@ -1024,6 +1052,10 @@ P = 1 - (Loss)^n
             <td align="center">0.99974</td>
             <td align="center">0.99805</td>
             <td align="center">0.98992</td>
+            <td align="center">0.95965</td>
+            <td align="center">0.86578</td>
+            <td align="center">0.61258</td>
+            <td align="center">0.36975</td>
           </tr> 
       	  <tr>
             <td align="center">10</td>
@@ -1033,6 +1065,10 @@ P = 1 - (Loss)^n
             <td align="center">0.99989</td>
             <td align="center">0.99902</td>
             <td align="center">0.99395</td>
+            <td align="center">0.97175</td>
+            <td align="center">0.89263</td>
+            <td align="center">0.65132</td>
+            <td align="center">0.40126</td>
           </tr> 
                  </tbody>
 </table>
