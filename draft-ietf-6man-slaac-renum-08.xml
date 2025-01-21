@@ -350,7 +350,61 @@ This is to align the Router Lifetime with the recommendations in <xref target="R
 
 <section title="Honor Small PIO Valid Lifetimes" anchor="sig-stale-config">
 
-<t>The entire item "e)" (pp. 19-20) from Section 5.5.3 of <xref target="RFC4862"/> is replaced with the following text:
+<t>This document introduces the following update to Section 5.5.3 of <xref target="RFC4862"/>:</t>
+
+<t>OLD TEXT:</t>
+<t>=======</t>
+<t>
+e)  If the advertised prefix is equal to the prefix of an address
+      configured by stateless autoconfiguration in the list, the
+      preferred lifetime of the address is reset to the Preferred
+      Lifetime in the received advertisement.  The specific action to
+      perform for the valid lifetime of the address depends on the Valid
+      Lifetime in the received advertisement and the remaining time to
+      the valid lifetime expiration of the previously autoconfigured
+      address.  We call the remaining time "RemainingLifetime" in the
+      following discussion:
+</t>
+<t>
+<list style="hanging">
+<t>
+1. If the received Valid Lifetime is greater than 2 hours or greater than RemainingLifetime, set the valid lifetime of the corresponding address to the advertised Valid Lifetime.
+</t>
+<t>
+2. If RemainingLifetime is less than or equal to 2 hours, ignore the Prefix Information option with regards to the valid lifetime, unless the Router Advertisement from which this option was obtained has been authenticated (e.g., via Secure Neighbor Discovery <xref target="RFC3971"/>).  If the Router Advertisement was authenticated, the valid lifetime of the corresponding address should be set to the Valid Lifetime in the received option.
+</t>
+<t>
+3. Otherwise, reset the valid lifetime of the corresponding address to 2 hours.
+</t>
+</list>
+</t>
+<t>
+The above rules address a specific denial-of-service attack in
+      which a bogus advertisement could contain prefixes with very small
+      Valid Lifetimes.  Without the above rules, a single
+      unauthenticated advertisement containing bogus Prefix Information
+      options with short Valid Lifetimes could cause all of a node's
+      addresses to expire prematurely.  The above rules ensure that
+      legitimate advertisements (which are sent periodically) will
+      "cancel" the short Valid Lifetimes before they actually take
+      effect.
+</t>
+<t>
+      Note that the preferred lifetime of the corresponding address is
+      always reset to the Preferred Lifetime in the received Prefix
+      Information option, regardless of whether the valid lifetime is
+      also reset or ignored.  The difference comes from the fact that
+      the possible attack for the preferred lifetime is relatively
+      minor.  Additionally, it is even undesirable to ignore the
+      preferred lifetime when a valid administrator wants to deprecate a
+      particular address by sending a short preferred lifetime (and the
+      valid lifetime is ignored by accident).
+</t>
+<t>=======</t>
+
+<t>NEW TEXT:</t>
+<t>=======</t>
+<t>
 <list style="hanging">
 <t>e)  If the advertised prefix is equal to the prefix of an address
       configured by stateless autoconfiguration in the list, the
@@ -360,18 +414,20 @@ This is to align the Router Lifetime with the recommendations in <xref target="R
 </t>
 </list>
 </t>
-
-
-
-
-
+<t>
+While allowing updates to the valid lifetime in RAs could enable an attacker to invalidate addresses by setting the valid lifetime to zero, this doesn't significantly worsen the security situation. An attacker capable of sending rogue RAs already has the power to disrupt connectivity by manipulating other parameters, such as gateway or DNS information.  Therefore, accepting a zero lifetime doesn't make the system more vulnerable than it already is in the presence of such an attacker.
+</t>
+<t>
+In scenarios where RA-based attacks are of concern, proper mitigations such as RA-Guard <xref target="RFC6105"/> <xref target="RFC7113"/> or SEND <xref target="RFC3971"/> should be implemented. 
+</t>
+<t>=======</t>
 
 <t>
 <list style="hanging">
 <t hangText="RATIONALE:">
 <list style="symbols">
 <t>
-This change allows hosts to react to the signal provided by a router that has positive knowledge that a prefix has become invalid.
+This change allows hosts to react to the signal provided by a router that has positive knowledge that a prefix is not assigned to the given link anymore. In particular it would allow the host to invalidate addresses from that prefix, and, if the prefix is reassigned to another link, allows the host to communicate to devices on that link.
 </t>
 <t>
 The behavior described in <xref target="RFC4862"/> had been incorporated during
@@ -383,11 +439,8 @@ The behavior described in <xref target="RFC4862"/> had been incorporated during
          risk than other ND-based attack vectors <xref target="IPNG-minutes"/>.
 <vspace blankLines="1" />
          While reconsidering the trade-offs represented by such
-         decision, we conclude that the drawbacks of the aforementioned mitigation outweigh the possible benefits.
+         decision, we conclude that the drawbacks of the aforementioned mitigation outweigh the possible benefits, as specified in the updated text.
 <vspace blankLines="1" />
-         In scenarios where RA-based attacks are of concern, proper
-         mitigations such as RA-Guard <xref target="RFC6105"/> <xref target="RFC7113"/> or SEND <xref target="RFC3971"/> should be
-         implemented. 
 </t>      
 
 </list>
