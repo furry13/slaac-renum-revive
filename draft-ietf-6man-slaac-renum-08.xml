@@ -415,10 +415,10 @@ The above rules address a specific denial-of-service attack in
 </list>
 </t>
 <t>
-While allowing updates to the valid lifetime in RAs could enable an attacker to invalidate addresses by setting the valid lifetime to zero, this doesn't significantly worsen the security situation. An attacker capable of sending rogue RAs already has the power to disrupt connectivity by manipulating other parameters, such as gateway or DNS information.  Therefore, accepting a zero lifetime doesn't make the system more vulnerable than it already is in the presence of such an attacker.
+While allowing updates to the valid lifetime in RAs could enable an attacker to invalidate addresses by setting the valid lifetime to zero, this does not significantly worsen the security situation. An attacker capable of sending rogue RAs already has the power to disrupt connectivity by manipulating other parameters, such as gateway or DNS information.  Therefore, accepting a zero lifetime does not make the system more vulnerable than it already is, as invalidating the prefix is just one of the many vectors available to perform DoS attacks to on-link node, see <xref target="RFC3756"/>.
 </t>
 <t>
-In scenarios where RA-based attacks are of concern, proper mitigations such as RA-Guard <xref target="RFC6105"/> <xref target="RFC7113"/> or SEND <xref target="RFC3971"/> should be implemented. 
+In scenarios where RA-based attacks are of concern, mitigations such as RA-Guard <xref target="RFC6105"/> <xref target="RFC7113"/> or SEND <xref target="RFC3971"/> should be implemented. 
 </t>
 <t>=======</t>
 
@@ -455,7 +455,7 @@ The behavior described in <xref target="RFC4862"/> had been incorporated during
 
 
 
-<t>When the information contained in RAs changes (e.g. an interface is reconfigured), it is paramount that updated information is propagated to hosts connected to the corresponding network in a timely manner. Thus, this document replaces the following text from Section 6.2.4 of <xref target="RFC4861"/>:
+<t>When the information to be contained in RAs changes (e.g. an interface is reconfigured), it is paramount that updated information is propagated to hosts connected to the corresponding network in a timely manner. Thus, this document replaces the following text from Section 6.2.4 of <xref target="RFC4861"/>:
 <list style="hanging">
 
 <t>
@@ -692,6 +692,7 @@ This document has no actions for IANA.
 	<?rfc include="reference.RFC.3971" ?>
 	<!-- DHCPv6 -->
 	<?rfc include="reference.RFC.8415" ?>
+	<?rfc include="reference.RFC.3756" ?>
 	<!-- VRRPv3 -->
 	<?rfc include="reference.RFC.9568" ?>
 
