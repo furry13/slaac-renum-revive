@@ -415,7 +415,7 @@ The above rules address a specific denial-of-service attack in
 </list>
 </t>
 <t>
-While allowing updates to the valid lifetime in RAs could enable an attacker to invalidate addresses by setting the valid lifetime to zero, this does not significantly worsen the security situation. An attacker capable of sending rogue RAs already has the power to disrupt connectivity by manipulating other parameters, such as gateway or DNS information.  Therefore, accepting a zero lifetime does not make the system more vulnerable than it already is, as invalidating the prefix is just one of the many vectors available to perform DoS attacks to on-link node, see <xref target="RFC3756"/>.
+While allowing updates to the valid lifetime in RAs could enable an attacker to invalidate addresses by setting the valid lifetime to zero, this does not significantly worsen the security situation. An attacker capable of sending rogue RAs already has the power to disrupt connectivity by manipulating other parameters, such as gateway or DNS information.  Therefore, accepting a zero lifetime does not make the system more vulnerable than it already is, as invalidating the prefix is just one of the many vectors available to perform DoS attacks to on-link node (see <xref target="RFC3756"/>).
 </t>
 <t>
 In scenarios where RA-based attacks are of concern, mitigations such as RA-Guard <xref target="RFC6105"/> <xref target="RFC7113"/> or SEND <xref target="RFC3971"/> should be implemented. 
