@@ -346,6 +346,44 @@ This is to align the Router Lifetime with the recommendations in <xref target="R
 </section>
 
 
+<section title="Propagating Interface Configuration Changes" anchor="init">
+
+
+<t>When the information to be contained in RAs changes (e.g. an interface is reconfigured), it is paramount that updated information is propagated to hosts connected to the corresponding network in a timely manner. Thus, this document replaces the following text from Section 6.2.4 of <xref target="RFC4861"/>:
+<list style="hanging">
+
+<t>
+
+   In such cases, the router MAY transmit up to
+   MAX_INITIAL_RTR_ADVERTISEMENTS unsolicited advertisements, using the
+   same rules as when an interface becomes an advertising interface.
+</t>
+</list>
+
+with:
+
+<list style="hanging">
+<t>
+   In such cases, the router MUST transmit 
+   MAX_INITIAL_RTR_ADVERTISEMENTS unsolicited advertisements, using the
+   same rules as when an interface becomes an advertising interface.
+</t>
+</list>
+</t>
+<t>
+<list style="hanging">
+<t hangText="RATIONALE:">
+<list style="symbols">
+<t>Use of stale information can lead to interoperability problems. Therefore, it is important that new configuration information propagates in a timelier manner to all hosts.</t>
+</list>
+</t>
+</list>
+</t>
+
+
+
+
+</section>
 
 
 <section title="Honor Small PIO Valid Lifetimes" anchor="sig-stale-config">
@@ -451,45 +489,6 @@ The behavior described in <xref target="RFC4862"/> had been incorporated during
 </section>
 
 
-<section title="Interface Initialization" anchor="init">
-
-
-
-<t>When the information to be contained in RAs changes (e.g. an interface is reconfigured), it is paramount that updated information is propagated to hosts connected to the corresponding network in a timely manner. Thus, this document replaces the following text from Section 6.2.4 of <xref target="RFC4861"/>:
-<list style="hanging">
-
-<t>
-
-   In such cases, the router MAY transmit up to
-   MAX_INITIAL_RTR_ADVERTISEMENTS unsolicited advertisements, using the
-   same rules as when an interface becomes an advertising interface.
-</t>
-</list>
-
-with:
-
-<list style="hanging">
-<t>
-   In such cases, the router MUST transmit 
-   MAX_INITIAL_RTR_ADVERTISEMENTS unsolicited advertisements, using the
-   same rules as when an interface becomes an advertising interface.
-</t>
-</list>
-</t>
-<t>
-<list style="hanging">
-<t hangText="RATIONALE:">
-<list style="symbols">
-<t>Use of stale information can lead to interoperability problems. Therefore, it is important that new configuration information propagates in a timelier manner to all hosts.</t>
-</list>
-</t>
-</list>
-</t>
-
-
-
-
-</section>
 
 
 <section title="Conveying Information in Router Advertisement (RA) Messages" anchor="ras">
