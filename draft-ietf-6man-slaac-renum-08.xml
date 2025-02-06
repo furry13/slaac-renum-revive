@@ -346,68 +346,18 @@ This is to align the Router Lifetime with the recommendations in <xref target="R
 </section>
 
 
+<section title="Propagating Interface Configuration Changes" anchor="init">
 
 
-<section title="Honor Small PIO Valid Lifetimes" anchor="sig-stale-config">
-
-<t>The entire item "e)" (pp. 19-20) from Section 5.5.3 of <xref target="RFC4862"/> is replaced with the following text:
-<list style="hanging">
-<t>e)  If the advertised prefix is equal to the prefix of an address
-      configured by stateless autoconfiguration in the list, the
-      valid lifetime and the preferred lifetime of the address should 
-      be updated by processing the Valid Lifetime and the Preferred
-      Lifetime (respectively) in the received advertisement.
-</t>
-</list>
-</t>
-
-
-
-
-
-
-<t>
-<list style="hanging">
-<t hangText="RATIONALE:">
-<list style="symbols">
-<t>
-This change allows hosts to react to the signal provided by a router that has positive knowledge that a prefix has become invalid.
-</t>
-<t>
-The behavior described in <xref target="RFC4862"/> had been incorporated during
-         the revision of the original IPv6 Stateless Address
-         Autoconfiguration specification (<xref target="RFC1971"/>). At the time, the
-         IPNG working group decided to mitigate the attack vector
-         represented by Prefix Information Options with very short
-         lifetimes, on the premise that these packets represented a bigger
-         risk than other ND-based attack vectors <xref target="IPNG-minutes"/>.
-<vspace blankLines="1" />
-         While reconsidering the trade-offs represented by such
-         decision, we conclude that the drawbacks of the aforementioned mitigation outweigh the possible benefits.
-<vspace blankLines="1" />
-         In scenarios where RA-based attacks are of concern, proper
-         mitigations such as RA-Guard <xref target="RFC6105"/> <xref target="RFC7113"/> or SEND <xref target="RFC3971"/> should be
-         implemented. 
-</t>      
-
-</list>
-</t>
-</list>
-</t>
-
-</section>
-
-
-<section title="Interface Initialization" anchor="init">
-
-
-
-<t>When an interface is initialized or reconfigured, it is paramount that network configuration information is propagated on the corresponding network in a timely manner. Thus, this document replaces the following text from Section 6.2.4 of <xref target="RFC4861"/>:
+<t>When the information to be contained in RAs changes (e.g. an interface is reconfigured), it is paramount that updated information is propagated to hosts connected to the corresponding network in a timely manner. Thus, this document replaces the following text from Section 6.2.4 of <xref target="RFC4861"/>:
 <list style="hanging">
 
 <t>
-
-   In such cases, the router MAY transmit up to
+   The information contained in Router Advertisements may change through
+   actions of system management.  For instance, the lifetime of
+   advertised prefixes may change, new prefixes could be added, a router
+   could cease to be a router (i.e., switch from being a router to being
+   a host), etc.  In such cases, the router MAY transmit up to
    MAX_INITIAL_RTR_ADVERTISEMENTS unsolicited advertisements, using the
    same rules as when an interface becomes an advertising interface.
 </t>
@@ -417,7 +367,13 @@ with:
 
 <list style="hanging">
 <t>
-   In such cases, the router MUST transmit 
+   The information contained in Router Advertisements may change through
+   actions of system management, or because it is derived from information
+   learned from an upstream router (via e.g. DHCPv6 [RFC8415]), and such 
+   information has changed. For instance, the lifetime of advertised prefixes may 
+   change, new prefixes could be added, existing prefixes could be removed,
+   a router could cease to be a router (i.e., switch from being a router to being
+   a host), etc.  In such cases, the router MUST transmit 
    MAX_INITIAL_RTR_ADVERTISEMENTS unsolicited advertisements, using the
    same rules as when an interface becomes an advertising interface.
 </t>
@@ -437,6 +393,111 @@ with:
 
 
 </section>
+
+
+<section title="Honor Small PIO Valid Lifetimes" anchor="sig-stale-config">
+
+<t>This document introduces the following update to Section 5.5.3 of <xref target="RFC4862"/>:</t>
+
+<t>OLD TEXT:</t>
+<t>=======</t>
+<t>
+e)  If the advertised prefix is equal to the prefix of an address
+      configured by stateless autoconfiguration in the list, the
+      preferred lifetime of the address is reset to the Preferred
+      Lifetime in the received advertisement.  The specific action to
+      perform for the valid lifetime of the address depends on the Valid
+      Lifetime in the received advertisement and the remaining time to
+      the valid lifetime expiration of the previously autoconfigured
+      address.  We call the remaining time "RemainingLifetime" in the
+      following discussion:
+</t>
+<t>
+<list style="hanging">
+<t>
+1. If the received Valid Lifetime is greater than 2 hours or greater than RemainingLifetime, set the valid lifetime of the corresponding address to the advertised Valid Lifetime.
+</t>
+<t>
+2. If RemainingLifetime is less than or equal to 2 hours, ignore the Prefix Information option with regards to the valid lifetime, unless the Router Advertisement from which this option was obtained has been authenticated (e.g., via Secure Neighbor Discovery <xref target="RFC3971"/>).  If the Router Advertisement was authenticated, the valid lifetime of the corresponding address should be set to the Valid Lifetime in the received option.
+</t>
+<t>
+3. Otherwise, reset the valid lifetime of the corresponding address to 2 hours.
+</t>
+</list>
+</t>
+<t>
+The above rules address a specific denial-of-service attack in
+      which a bogus advertisement could contain prefixes with very small
+      Valid Lifetimes.  Without the above rules, a single
+      unauthenticated advertisement containing bogus Prefix Information
+      options with short Valid Lifetimes could cause all of a node's
+      addresses to expire prematurely.  The above rules ensure that
+      legitimate advertisements (which are sent periodically) will
+      "cancel" the short Valid Lifetimes before they actually take
+      effect.
+</t>
+<t>
+      Note that the preferred lifetime of the corresponding address is
+      always reset to the Preferred Lifetime in the received Prefix
+      Information option, regardless of whether the valid lifetime is
+      also reset or ignored.  The difference comes from the fact that
+      the possible attack for the preferred lifetime is relatively
+      minor.  Additionally, it is even undesirable to ignore the
+      preferred lifetime when a valid administrator wants to deprecate a
+      particular address by sending a short preferred lifetime (and the
+      valid lifetime is ignored by accident).
+</t>
+<t>=======</t>
+
+<t>NEW TEXT:</t>
+<t>=======</t>
+<t>
+<list style="hanging">
+<t>e)  If the advertised prefix is equal to the prefix of an address
+      configured by stateless autoconfiguration in the list, the
+      valid lifetime and the preferred lifetime of the address should 
+      be updated by processing the Valid Lifetime and the Preferred
+      Lifetime (respectively) in the received advertisement.
+</t>
+</list>
+</t>
+<t>
+While allowing updates to the valid lifetime in RAs could enable an attacker to invalidate addresses by setting the valid lifetime to zero, this does not significantly worsen the security situation. An attacker capable of sending rogue RAs already has the power to disrupt connectivity by manipulating other parameters, such as gateway or DNS information.  Therefore, accepting a zero lifetime does not make the system more vulnerable than it already is, as invalidating the prefix is just one of the many vectors available to perform DoS attacks to on-link node (see <xref target="RFC3756"/>).
+</t>
+<t>
+In scenarios where RA-based attacks are of concern, mitigations such as RA-Guard <xref target="RFC6105"/> <xref target="RFC7113"/> or SEND <xref target="RFC3971"/> should be implemented. 
+</t>
+<t>=======</t>
+
+<t>
+<list style="hanging">
+<t hangText="RATIONALE:">
+<list style="symbols">
+<t>
+This change allows hosts to react to the signal provided by a router that has positive knowledge that a prefix is not assigned to the given link anymore. In particular it would allow the host to invalidate addresses from that prefix, and, if the prefix is reassigned to another link, allows the host to communicate to devices on that link.
+</t>
+<t>
+The behavior described in <xref target="RFC4862"/> had been incorporated during
+         the revision of the original IPv6 Stateless Address
+         Autoconfiguration specification (<xref target="RFC1971"/>). At the time, the
+         IPNG working group decided to mitigate the attack vector
+         represented by Prefix Information Options with very short
+         lifetimes, on the premise that these packets represented a bigger
+         risk than other ND-based attack vectors <xref target="IPNG-minutes"/>.
+<vspace blankLines="1" />
+         While reconsidering the trade-offs represented by such
+         decision, we conclude that the drawbacks of the aforementioned mitigation outweigh the possible benefits, as specified in the updated text.
+<vspace blankLines="1" />
+</t>      
+
+</list>
+</t>
+</list>
+</t>
+
+</section>
+
+
 
 
 <section title="Conveying Information in Router Advertisement (RA) Messages" anchor="ras">
@@ -639,6 +700,7 @@ This document has no actions for IANA.
 	<?rfc include="reference.RFC.3971" ?>
 	<!-- DHCPv6 -->
 	<?rfc include="reference.RFC.8415" ?>
+	<?rfc include="reference.RFC.3756" ?>
 	<!-- VRRPv3 -->
 	<?rfc include="reference.RFC.9568" ?>
 
@@ -908,6 +970,10 @@ P = 1 - (Loss)^n
             <td align="center">0.40</td>
             <td align="center">0.50</td>
             <td align="center">0.60</td>
+            <td align="center">0.70</td>
+            <td align="center">0.80</td>
+            <td align="center">0.90</td>
+            <td align="center">0.96</td>
           </tr>      
       	  <tr>
             <td align="center">3</td>
@@ -917,6 +983,10 @@ P = 1 - (Loss)^n
             <td align="center">0.93600</td>
             <td align="center">0.87500</td>
             <td align="center">0.78400</td>
+            <td align="center">0.65700</td>
+            <td align="center">0.48800</td>
+            <td align="center">0.27100</td>
+            <td align="center">0.14263</td>
           </tr> 
       	  <tr>
             <td align="center">4</td>
@@ -926,6 +996,10 @@ P = 1 - (Loss)^n
             <td align="center">0.97440</td>
             <td align="center">0.93750</td>
             <td align="center">0.87040</td>
+            <td align="center">0.75990</td>
+            <td align="center">0.59040</td>
+            <td align="center">0.34390</td>
+            <td align="center">0.18549</td>
           </tr> 
       	  <tr>
             <td align="center">5</td>
@@ -935,6 +1009,10 @@ P = 1 - (Loss)^n
             <td align="center">0.98976</td>
             <td align="center">0.96875</td>
             <td align="center">0.92224</td>
+            <td align="center">0.83193</td>
+            <td align="center">0.67232</td>
+            <td align="center">0.40951</td>
+            <td align="center">0.46856</td>
           </tr> 
       	  <tr>
             <td align="center">6</td>
@@ -944,6 +1022,10 @@ P = 1 - (Loss)^n
             <td align="center">0.99590</td>
             <td align="center">0.98437</td>
             <td align="center">0.95334</td>
+            <td align="center">0.88235</td>
+            <td align="center">0.73786</td>
+            <td align="center">0.46856</td>
+            <td align="center">0.26491</td>
           </tr> 
       	  <tr>
             <td align="center">7</td>
@@ -953,6 +1035,10 @@ P = 1 - (Loss)^n
             <td align="center">0.99836</td>
             <td align="center">0.99219</td>
             <td align="center">0.97201</td>
+            <td align="center">0.91765</td>
+            <td align="center">0.79028</td>
+            <td align="center">0.52170</td>
+            <td align="center">0.30166</td>
           </tr> 
       	  <tr>
             <td align="center">8</td>
@@ -962,6 +1048,10 @@ P = 1 - (Loss)^n
             <td align="center">0.99934</td>
             <td align="center">0.99609</td>
             <td align="center">0.98320</td>
+            <td align="center">0.94235</td>
+            <td align="center">0.83223</td>
+            <td align="center">0.56953</td>
+            <td align="center">0.33658</td>
           </tr> 
       	  <tr>
             <td align="center">9</td>
@@ -971,6 +1061,10 @@ P = 1 - (Loss)^n
             <td align="center">0.99974</td>
             <td align="center">0.99805</td>
             <td align="center">0.98992</td>
+            <td align="center">0.95965</td>
+            <td align="center">0.86578</td>
+            <td align="center">0.61258</td>
+            <td align="center">0.36975</td>
           </tr> 
       	  <tr>
             <td align="center">10</td>
@@ -980,6 +1074,10 @@ P = 1 - (Loss)^n
             <td align="center">0.99989</td>
             <td align="center">0.99902</td>
             <td align="center">0.99395</td>
+            <td align="center">0.97175</td>
+            <td align="center">0.89263</td>
+            <td align="center">0.65132</td>
+            <td align="center">0.40126</td>
           </tr> 
                  </tbody>
 </table>
