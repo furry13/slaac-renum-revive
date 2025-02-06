@@ -353,8 +353,11 @@ This is to align the Router Lifetime with the recommendations in <xref target="R
 <list style="hanging">
 
 <t>
-
-   In such cases, the router MAY transmit up to
+   The information contained in Router Advertisements may change through
+   actions of system management.  For instance, the lifetime of
+   advertised prefixes may change, new prefixes could be added, a router
+   could cease to be a router (i.e., switch from being a router to being
+   a host), etc.  In such cases, the router MAY transmit up to
    MAX_INITIAL_RTR_ADVERTISEMENTS unsolicited advertisements, using the
    same rules as when an interface becomes an advertising interface.
 </t>
@@ -364,7 +367,13 @@ with:
 
 <list style="hanging">
 <t>
-   In such cases, the router MUST transmit 
+   The information contained in Router Advertisements may change through
+   actions of system management, or because it is derived from information
+   learned from an upstream router (via e.g. DHCPv6 [RFC8415]), and such 
+   information has changed. For instance, the lifetime of advertised prefixes may 
+   change, new prefixes could be added, existing prefixes could be removed,
+   a router could cease to be a router (i.e., switch from being a router to being
+   a host), etc.  In such cases, the router MUST transmit 
    MAX_INITIAL_RTR_ADVERTISEMENTS unsolicited advertisements, using the
    same rules as when an interface becomes an advertising interface.
 </t>
