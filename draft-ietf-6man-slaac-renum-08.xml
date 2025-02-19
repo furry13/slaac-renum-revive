@@ -795,6 +795,16 @@ This document has no actions for IANA.
 </section>
 </section>
 
+<section title="Prefix-Specific Link-Local Addresses">
+<t>
+Various router vendors already allow administrators to configure multiple link-local addresses on a given interface (e.g. configuring an interface link-local and multiple VRRP link-local addresses).
+Some implementations are known to use multiple addresses to send RAs (but currently each RA includes all PIOs, instead of only one).
+</t>
+<t>
+Statically configuring prefix-specific link-local addresses has been successfuly deployed in large-scale IPv6-mostly network to mitigate the impact of flash renumebring and host mobility.
+</t>
+</section>
+
 <section title="Conveying Information in Router Advertisement (RA) Messages" anchor="impl-ras">
 <t>We know of no implementation that splits network configuration information into multiple RA messages.</t>
 </section>
