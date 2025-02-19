@@ -313,9 +313,13 @@ The following subsections update <xref target="RFC4191"/>, <xref target="RFC4861
 <vspace blankLines="0" />This allows local hosts to learn about stale configuration information in a timelier manner.</t>
 <t>Honor PIOs with small Valid Lifetimes (<xref target="sig-stale-config"/>): 
 <vspace blankLines="0" />This allows hosts to honor PIOs with a Valid Lifetime less than 2 hours, thus resulting in a timelier reaction to flash-renumbering events.</t>
+<t>
+Recommend routers to support prefix-specific link-local addresses as a configurable behavior, which can be enabled in envinronments susceptible to flash renumbering (<xref target="pslla"/>).
+<vspace blankLines="0" />This allows hosts to detect the prefix change much faster in the absense of any explicit renumbering signals.
+</t>
 <t>Recommend routers to retransmit configuration information upon interface initialization/reconfiguration (<xref target="init"/>): 
 <vspace blankLines="0" />This helps spread the network configuration information in a timelier manner.</t>
-<t>Recommend routers to always send all options (i.e. the complete configuration information) in RA messages, and in the smallest possible number of packets (<xref target="ras"/>): 
+<t>Recommend routers to send all applicable options (i.e. the complete configuration information) in RA messages, and in the smallest possible number of packets (<xref target="ras"/>): 
 <vspace blankLines="0" />This helps propagate the same information to all hosts.</t>
 </list>
 </t>
@@ -465,6 +469,52 @@ Managed networks, where advertized prefixes are configured statically by adminis
 Networks which benefit most from the prefix-specific link-local addresses approach are ones using DHCPv6-PD,  where prefixes can change suddenly, after link flap or a router reboot.
 Therefore this document recommends enabling prefix-specific link-local address by default only if PIO prefixes are obtained via DHCPv6-PD.
 </t>
+
+<t>
+This document also modifies Section 6.2.8 of <xref target="RFC4861"/>:
+</t>
+<t>
+===
+</t>
+<t>OLD TEXT:</t>
+<t>
+===
+</t>
+<t>
+Using the link-local address to uniquely identify routers on the link has the benefit that the address a router is known by should not change when a site renumbers.
+</t>
+<t>
+===
+</t>
+<t>NEW TEXT:</t>
+<t>
+===
+</t>
+<t>
+Using the link-local address to uniquely identify routers on the link has the benefit that the address a router is known by should not change when a site renumbers and the renumbering event is explicitly signalled and properly propagated to all hosts.
+However, in case of flash renumbering without explicit signalling the router SHOULD be able change the link-local address of an interface following renumbering events, to help hosts detect prefix changes and update their configuration accordingly.
+</t>
+<t>
+===
+</t>
+<t>
+If the interface subnets are configured statically, the network administrator can configure link-local addresses statically as well. In some cases it might be possible to just utilize the global subnet prefix as an interface ID. For example, if the router has two interfaces configured with 2001:db8:1:1::/64 and 2001:db8:2:2::/64 subnets respectively, it is sufficient to configure fe80::2001:db8:1:1 and fe80::2001:db8:2:2 as the link-local addresses for those interfaces. If the first-hop redundancy is provided by VRRPv3, there is no need to configure the static link-local interface addresses but the virtual link-local address SHOULD be configured instead.
+</t>
+
+<section anchor="stable">
+<name>
+Subnet-Specific and Stable Link-Local Addresses
+</name>
+<t>
+In many cases it might be beneficial for a router to have a stable link-local address (e.g. if that address is advertized as a DNS server, or for management purposes.
+Router MAY generate subnet-specific link-local addresses in addition to a stable link-local address.
+</t>
+
+<t>
+It should be noted that the proposed mechanism assumes that the router does not use the modified EUI-64 format for generating interface ID. As per Section 3 of <xref target="RFC8064"/>, nodes SHOULD NOT use the modified EUI-64 format, and SHOULD use the algorithm defined in <xref target="RFC7217"/> instead. 
+</t>
+</section>
+
 
 
 </section>
@@ -675,6 +725,10 @@ Routers SHOULD whenever possible, split the information between the fewest possi
 </list>
 </t>
 
+<t>When a router distributes information across multiple Router Advertisements (RAs), it SHOULD minimize the time interval between them.
+Doing so reduces the energy consumption of battery-powered devices that must awaken to receive those RAs.
+</t>
+
 <t>
 <list style="hanging">
 <t hangText="RATIONALE:">
@@ -834,6 +888,7 @@ This document has no actions for IANA.
 	<?rfc include="reference.RFC.3756" ?>
 	<?rfc include="reference.RFC.7772" ?>
 	<?rfc include="reference.RFC.8028" ?>
+	<?rfc include="reference.RFC.8064" ?>
 	<!-- VRRPv3 -->
 	<?rfc include="reference.RFC.9568" ?>
 
