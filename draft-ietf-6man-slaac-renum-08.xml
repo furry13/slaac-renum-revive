@@ -815,7 +815,6 @@ This document has no actions for IANA.
 	<!-- PvD -->
 	<?rfc include="reference.RFC.7556" ?>
 	<?rfc include="reference.RFC.7217" ?>
-	<?rfc include="reference.RFC.7772" ?>
 	<?rfc include="reference.RFC.8174" ?>
 
 	</references>
@@ -833,6 +832,7 @@ This document has no actions for IANA.
 	<!-- DHCPv6 -->
 	<?rfc include="reference.RFC.8415" ?>
 	<?rfc include="reference.RFC.3756" ?>
+	<?rfc include="reference.RFC.7772" ?>
 	<?rfc include="reference.RFC.8028" ?>
 	<!-- VRRPv3 -->
 	<?rfc include="reference.RFC.9568" ?>
