@@ -802,6 +802,8 @@ Some implementations are known to use multiple addresses to send RAs (but curren
 </t>
 <t>
 Statically configuring prefix-specific link-local addresses has been successfuly deployed in large-scale IPv6-mostly network to mitigate the impact of flash renumebring and host mobility.
+In large enterprise networks it's been observed that if a device changes the network attachement without detecting it (e.g. a VLAN assignment changes on a wired port, or the device roams between two wireless access points using the same SSID but different IPv6 subnets), the device ends up with IPv6 addresses from both "old" and "new" subnets.
+Using prefix-specific link-local addresses (for example, encoding the network prefix as the interface ID for the VRRP link-local address, e.g using fe80::2001:db:a:b as a VRRP link-local for 2001:db8:a:b::/64 subnet) allows both Apple and Android devices to detect the renumering even and start using source addresses from a "new" prefix.
 </t>
 </section>
 
