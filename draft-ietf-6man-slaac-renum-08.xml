@@ -462,6 +462,7 @@ As discussed in Section 6.2.8 of <xref target="RFC4861"/>, using multiple link-l
 </t>
 
 <t>
+Note:
 As discussed in <xref target="gulla"/>, sending each PIO in a dedicated RA using a prefix-specific link-local address as a source address can help hosts to detect changes in a list of prefixes advertized on a given link.
 However, this approach increases number of RAs sent periodically and in response to Router Solicitations.
 Managed networks, where advertized prefixes are configured statically by administrators, are less likely to experience flash renumbering without explicit signalling.
