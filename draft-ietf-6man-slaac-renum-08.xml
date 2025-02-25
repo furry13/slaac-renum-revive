@@ -453,8 +453,7 @@ The router SHOULD also follow recommendations from Section 6.2.8 of <xref target
 </t>
 
 <t>
-Prefix-specific link-local addresses functionality SHOULD be configurable.
-Routers supporting prefix-specific link-local addresses SHOULD enable it on an interface susceptible to flash renumbering, e.g., if AdvPrefixList contains prefixes obtained dynamically from DHCPv6-PD.
+Prefix-specific link-local addresses functionality SHOULD be configurable and SHOULD be enabled by default only on interfaces susceptible to flash renumbering, e.g., if AdvPrefixList contains prefixes obtained dynamically from DHCPv6-PD.
 In all other cases, prefix-specific link-local addresses SHOULD be disabled by default and MAY be enabled by the administrator.
 </t>
 
