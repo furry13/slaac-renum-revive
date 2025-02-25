@@ -8,7 +8,7 @@
 <?rfc sortrefs="yes"?>
 <?rfc strict="no" ?>
 
-<rfc updates="4191, 4861, 4862, 8106" category="std"  ipr="trust200902"
+<rfc updates="4191, 4861, 4862, 8106, 8028" category="std"  ipr="trust200902"
 docName="draft-ietf-6man-slaac-renum-08">
   <front>
     <title abbrev="Reaction to Renumbering Events">Improving the Robustness of Stateless Address Autoconfiguration (SLAAC) to Flash Renumbering Events</title>
@@ -514,6 +514,35 @@ Router MAY generate subnet-specific link-local addresses in addition to a stable
 It should be noted that the proposed mechanism assumes that the router does not use the modified EUI-64 format for generating interface ID. As per Section 3 of <xref target="RFC8064"/>, nodes SHOULD NOT use the modified EUI-64 format, and SHOULD use the algorithm defined in <xref target="RFC7217"/> instead. 
 </t>
 </section>
+
+<section>
+<name>RFC8028 and Default Router Selection</name>
+<t>
+<xref target="RFC8028"/> requires that "a host SHOULD select default routers for each prefix it is assigned an address in" and that "Routers that have advertised the prefix in their Router Advertisement message SHOULD be preferred over routers that do not advertise the prefix, regardless of Default Router Preference. ".
+
+However it should be noted that as per Section 6.3.6 of <xref target="RFC4861"/>, the host can still select default routers even if the router is not reachable (its Neighbor Cache entry is INCOMPLETE).
+Selecting such router would be undersirable, as it would prevent eliminating unreachable nexthop and defeating the whole purpose of per-prefix link-local addresses.
+Therefore this document updates <xref target="RFC8028"/>
+</t>
+<t>
+OLD TEXT:
+</t>
+<t>=====</t>
+<t>
+
+Routers that have advertised the prefix in their Router Advertisement message SHOULD be preferred over routers that do not advertise the prefix, regardless of Default Router Preference. 
+</t>
+<t>=====</t>
+<t>NEW TEXT</t>
+<t>=====</t>
+<t>
+Routers that that are reachable or probably reachable (i.e., in any state other than INCOMPLETE) and have advertised the prefix in their Router Advertisement message SHOULD be preferred over routers that do not advertise the prefix, regardless of Default Router Preference. 
+</t>
+<t>=====</t>
+
+
+</section>
+
 
 
 
