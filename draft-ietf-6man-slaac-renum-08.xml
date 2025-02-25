@@ -756,6 +756,7 @@ Routers SHOULD whenever possible, split the information between the fewest possi
 
 <t>When a router distributes information across multiple Router Advertisements (RAs), it SHOULD minimize the time interval between them.
 Doing so reduces the energy consumption of battery-powered devices that must awaken to receive those RAs.
+Ideally, all RAs shall be sent together, as a bundle, so MaxRtrAdvInterval and MinRtrAdvInterval are applied to the whole bundle.
 </t>
 
 <t>
