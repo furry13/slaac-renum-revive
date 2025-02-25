@@ -443,7 +443,7 @@ This is to align the Router Lifetime with the recommendations in <xref target="R
 <t>
 It is highly desirable, as discussed in <xref target="gulla"/>, to ensure that renumbering or any changes to the set of prefixes advertized in PIOs detected by hosts in timely manner. Therefore routers which support multiple link-local addresses per interface SHOULD support the following functionality:
 <list style="symbols">
-<t>Generating (using  <xref target="RFC7217"/> algorithm) or allowing the administrator to configure a dedicated link-local address for each prefix in AdvPrefixList (<xref target="RFC4861"/>);</t>
+<t>Generating (by employing the <xref target="RFC7217"/> algorithm, with Prefix parameter set to the prefix from the PIO) or allowing the administrator to configure a dedicated link-local address for each prefix in AdvPrefixList (<xref target="RFC4861"/>);</t>
 <t>Sending a PIO for each prefix in a separate RA, using that dedicated link-local address as a source. When populating fields in each RA as per Section 6.2.3 of <xref target="RFC4861"/>, AdvPrefixList is treated as containing one specific prefix only.</t>
 <t>
 Removing the prefix-specific link-local address from the interface when the corresponding prefix is no longer advertized in a PIO sent from that interface.
