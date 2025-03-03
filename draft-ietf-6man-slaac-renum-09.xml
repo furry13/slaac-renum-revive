@@ -9,7 +9,7 @@
 <?rfc strict="no" ?>
 
 <rfc updates="4191, 4861, 4862, 8106" category="std"  ipr="trust200902"
-docName="draft-ietf-6man-slaac-renum-08">
+docName="draft-ietf-6man-slaac-renum-09">
   <front>
     <title abbrev="Reaction to Renumbering Events">Improving the Robustness of Stateless Address Autoconfiguration (SLAAC) to Flash Renumbering Events</title>
 
