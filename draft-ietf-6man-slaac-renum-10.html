@@ -1,0 +1,2387 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>Improving the Robustness of Stateless Address Autoconfiguration (SLAAC) to Flash Renumbering Events</title>
+<meta content="Fernando Gont" name="author">
+<meta content="Jan Zorz" name="author">
+<meta content="Richard Patterson" name="author">
+<meta content="Jen Linkova" name="author">
+<meta content="
+       In scenarios where network configuration information becomes invalid without explicit notification to the local network, local hosts may end up employing stale information for an unacceptably long period of time, thus resulting in interoperability problems. This document improves the reaction of IPv6 Stateless Address Autoconfiguration to such configuration changes. It formally updates RFC 4191, RFC 4861, RFC 4862, and RFC 8106. 
+    " name="description">
+<meta content="xml2rfc 3.30.1" name="generator">
+<meta name="keyword">
+<meta content="draft-ietf-6man-slaac-renum-10" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.30.1
+    Python 3.12.3
+    ConfigArgParse 1.7.1
+    google-i18n-address 3.1.1
+    intervaltree 3.1.0
+    Jinja2 3.1.6
+    lxml 6.0.1
+    platformdirs 4.3.8
+    pycountry 24.6.1
+    PyYAML 6.0.2
+    requests 2.32.4
+    setuptools 80.9.0
+    wcwidth 0.2.13
+    weasyprint 65.0
+-->
+<link href="draft-ietf-6man-slaac-renum-10.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">/*
+
+  NOTE: Changes at the bottom of this file overrides some earlier settings.
+
+  Once the style has stabilized and has been adopted as an official RFC style,
+  this can be consolidated so that style settings occur only in one place, but
+  for now the contents of this file consists first of the initial CSS work as
+  provided to the RFC Formatter (xml2rfc) work, followed by itemized and
+  commented changes found necessary during the development of the v3
+  formatters.
+
+*/
+
+/* fonts */
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans'); /* Sans-serif */
+@import url('https://fonts.googleapis.com/css?family=Noto+Serif'); /* Serif (print) */
+@import url('https://fonts.googleapis.com/css?family=Roboto+Mono'); /* Monospace */
+
+:root {
+  --font-sans: 'Noto Sans', Arial, Helvetica, sans-serif;
+  --font-serif: 'Noto Serif', 'Times', 'Times New Roman', serif;
+  --font-mono: 'Roboto Mono', Courier, 'Courier New', monospace;
+}
+
+@viewport {
+  zoom: 1.0;
+}
+@-ms-viewport {
+  width: extend-to-zoom;
+  zoom: 1.0;
+}
+/* general and mobile first */
+html {
+}
+body {
+  max-width: 90%;
+  margin: 1.5em auto;
+  color: #222;
+  background-color: #fff;
+  font-size: 14px;
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  scroll-behavior: smooth;
+  overflow-wrap: break-word;
+}
+.ears {
+  display: none;
+}
+
+/* headings */
+#title, h1, h2, h3, h4, h5, h6 {
+  margin: 1em 0 0.5em;
+  font-weight: bold;
+  line-height: 1.3;
+}
+#title {
+  clear: both;
+  border-bottom: 1px solid #ddd;
+  margin: 0 0 0.5em 0;
+  padding: 1em 0 0.5em;
+}
+.author {
+  padding-bottom: 4px;
+}
+h1 {
+  font-size: 26px;
+  margin: 1em 0;
+}
+h2 {
+  font-size: 22px;
+  margin-top: -20px;  /* provide offset for in-page anchors */
+  padding-top: 33px;
+}
+h3 {
+  font-size: 18px;
+  margin-top: -36px;  /* provide offset for in-page anchors */
+  padding-top: 42px;
+}
+h4 {
+  font-size: 16px;
+  margin-top: -36px;  /* provide offset for in-page anchors */
+  padding-top: 42px;
+}
+h5, h6 {
+  font-size: 14px;
+}
+#n-copyright-notice {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 1em;
+  margin-bottom: 1em;
+}
+/* general structure */
+p {
+  padding: 0;
+  margin: 0 0 1em 0;
+  text-align: left;
+}
+div, span {
+  position: relative;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  padding: 1em 1em 0;
+  margin-bottom: 1.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+@media print {
+  svg {
+    max-height: 850px;
+    max-width: 660px;
+  }
+}
+svg[font-family~="serif" i], svg [font-family~="serif" i] {
+  font-family: var(--font-serif);
+}
+svg[font-family~="sans-serif" i], svg [font-family~="sans-serif" i] {
+  font-family: var(--font-sans);
+}
+svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
+  font-family: var(--font-mono);
+}
+.alignCenter.art-text {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 3px;
+  padding: 1em 1em 0;
+  margin-bottom: 1.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  display: table;
+  border: none;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 1em 2em;
+}
+ol ol, ul ul, ol ul, ul ol {
+  margin-left: 1em;
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+.ulCompact li {
+  margin: 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+}
+ul.empty li, .ulEmpty li {
+  margin-top: 0.5em;
+}
+ul.ulBare, li.ulBare {
+  margin-left: 0em !important;
+}
+ul.compact, .ulCompact,
+ol.compact, .olCompact {
+  line-height: 100%;
+  margin: 0 0 0 2em;
+}
+
+/* definition lists */
+dl {
+}
+dl > dt {
+  float: left;
+  margin-right: 1em;
+}
+/* 
+dl.nohang > dt {
+  float: none;
+}
+*/
+dl > dd {
+  margin-bottom: .8em;
+  min-height: 1.3em;
+}
+dl.compact > dd, .dlCompact > dd {
+  margin-bottom: 0em;
+}
+dl > dd > dl {
+  margin-top: 0.5em;
+  margin-bottom: 0em;
+}
+
+/* links */
+a {
+  text-decoration: none;
+}
+a[href] {
+  color: #22e; /* Arlen: WCAG 2019 */
+}
+a[href]:hover {
+  background-color: #f2f2f2;
+}
+figcaption a[href],
+a[href].selfRef {
+  color: #222;
+}
+/* XXX probably not this:
+a.selfRef:hover {
+  background-color: transparent;
+  cursor: default;
+} */
+
+/* Figures */
+tt, code, pre {
+  background-color: #f9f9f9;
+  font-family: var(--font-mono);
+}
+pre {
+  border: 1px solid #eee;
+  margin: 0;
+  padding: 1em;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption {
+  font-style: italic;
+  margin: 0 0 1em 0;
+}
+@media screen {
+  pre {
+    overflow-x: auto;
+    max-width: 100%;
+    max-width: calc(100% - 22px);
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 1.2em 2em;
+}
+blockquote {
+  background-color: #f9f9f9;
+  color: #111; /* Arlen: WCAG 2019 */
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  margin: 1em 0;
+}
+blockquote > *:last-child {
+  margin-bottom: 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+.xref {
+  overflow-wrap: normal;
+}
+
+/* tables */
+table {
+  width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  border: 1px solid #eee;
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.5em 0.75em;
+}
+th {
+  text-align: left;
+  background-color: #e9e9e9;
+}
+tr:nth-child(2n+1) > td {
+  background-color: #f5f5f5;
+}
+table caption {
+  font-style: italic;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+table p {
+  /* XXX to avoid bottom margin on table row signifiers. If paragraphs should
+     be allowed within tables more generally, it would be far better to select on a class. */
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  color: #666; /* Arlen: AHDJ 2019 */
+  text-decoration: none;
+  visibility: hidden;
+  user-select: none;
+  -ms-user-select: none;
+  -o-user-select:none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+@media screen {
+  aside:hover > a.pilcrow,
+  p:hover > a.pilcrow,
+  blockquote:hover > a.pilcrow,
+  div:hover > a.pilcrow,
+  li:hover > a.pilcrow,
+  pre:hover > a.pilcrow {
+    visibility: visible;
+  }
+  a.pilcrow:hover {
+    background-color: transparent;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid #eee;
+}
+.bcp14 {
+  font-variant: small-caps;
+}
+
+.role {
+  font-variant: all-small-caps;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: 0.9em;
+}
+#identifiers dt {
+  width: 3em;
+  clear: left;
+}
+#identifiers dd {
+  float: left;
+  margin-bottom: 0;
+}
+/* Fix PDF info block run off issue */
+@media print {
+  #identifiers dd {
+    max-width: 100%;
+  }
+}
+#identifiers .authors .author {
+  display: inline-block;
+  margin-right: 1.5em;
+}
+#identifiers .authors .org {
+  font-style: italic;
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #666; /* Arlen: WCAG 2019 */
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: left;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc  {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+}
+nav.toc ul {
+  margin: 0 0.5em 0 0;
+  padding: 0;
+  list-style: none;
+}
+nav.toc li {
+  line-height: 1.3em;
+  margin: 0.75em 0;
+  padding-left: 1.2em;
+  text-indent: -1.2em;
+}
+/* references */
+.references dt {
+  text-align: right;
+  font-weight: bold;
+  min-width: 7em;
+}
+.references dd {
+  margin-left: 8em;
+  overflow: auto;
+}
+
+.refInstance {
+  margin-bottom: 1.25em;
+}
+
+.refSubseries {
+  margin-bottom: 1.25em;
+}
+
+.references .ascii {
+  margin-bottom: 0.25em;
+}
+
+/* index */
+.index ul {
+  margin: 0 0 0 1em;
+  padding: 0;
+  list-style: none;
+}
+.index ul ul {
+  margin: 0;
+}
+.index li {
+  margin: 0;
+  text-indent: -2em;
+  padding-left: 2em;
+  padding-bottom: 5px;
+}
+.indexIndex {
+  margin: 0.5em 0 1em;
+}
+.index a {
+  font-weight: 700;
+}
+/* make the index two-column on all but the smallest screens */
+@media (min-width: 600px) {
+  .index ul {
+    -moz-column-count: 2;
+    -moz-column-gap: 20px;
+  }
+  .index ul ul {
+    -moz-column-count: 1;
+    -moz-column-gap: 0;
+  }
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  margin: 1em 0;
+}
+
+address.vcard .nameRole {
+  font-weight: 700;
+  margin-left: 0;
+}
+address.vcard .label {
+  font-family: var(--font-sans);
+  margin: 0.5em 0;
+}
+address.vcard .type {
+  display: none;
+}
+.alternative-contact {
+  margin: 1.5em 0 1em;
+}
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+
+/* temporary notes */
+.rfcEditorRemove::before {
+  position: absolute;
+  top: 0.2em;
+  right: 0.2em;
+  padding: 0.2em;
+  content: "The RFC Editor will remove this note";
+  color: #9e2a00; /* Arlen: WCAG 2019 */
+  background-color: #ffd; /* Arlen: WCAG 2019 */
+}
+.rfcEditorRemove {
+  position: relative;
+  padding-top: 1.8em;
+  background-color: #ffd; /* Arlen: WCAG 2019 */
+  border-radius: 3px;
+}
+.cref {
+  background-color: #ffd; /* Arlen: WCAG 2019 */
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+/* alternative layout for smaller screens */
+@media screen and (max-width: 1023px) {
+  body {
+    padding-top: 2em;
+  }
+  #title {
+    padding: 1em 0;
+  }
+  h1 {
+    font-size: 24px;
+  }
+  h2 {
+    font-size: 20px;
+    margin-top: -18px;  /* provide offset for in-page anchors */
+    padding-top: 38px;
+  }
+  #identifiers dd {
+    max-width: 60%;
+  }
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+    background-color: inherit;
+    border-bottom: 1px solid #ccc;
+  }
+  #toc h2 {
+    margin: -1px 0 0 0;
+    padding: 4px 0 4px 6px;
+    padding-right: 1em;
+    min-width: 190px;
+    font-size: 1.1em;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+  }
+  #toc h2::before { /* css hamburger */
+    float: right;
+    position: relative;
+    width: 1em;
+    height: 1px;
+    left: -164px;
+    margin: 6px 0 0 0;
+    background: white none repeat scroll 0 0;
+    box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+    content: "";
+  }
+  #toc nav {
+    display: none;
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+}
+
+/* alternative layout for wide screens */
+@media screen and (min-width: 1024px) {
+  body {
+    max-width: 724px;
+    margin: 42px auto;
+    padding-left: 1.5em;
+    padding-right: 29em;
+  }
+  #toc {
+    position: fixed;
+    top: 42px;
+    right: 42px;
+    width: 25%;
+    margin: 0;
+    padding: 0 1em;
+    z-index: 1;
+  }
+  #toc h2 {
+    border-top: none;
+    border-bottom: 1px solid #ddd;
+    font-size: 1em;
+    font-weight: normal;
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 0;
+    overflow: auto;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre {
+    page-break-inside: avoid;
+  }
+  figure {
+    overflow: scroll;
+  }
+  .breakable pre {
+    break-inside: auto;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  h2+*, h3+*, h4+*, h5+*, h6+* {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+/* This is commented out here, as the string-set: doesn't
+   pass W3C validation currently */
+/*
+.ears thead .left {
+  string-set: ears-top-left content();
+}
+
+.ears thead .center {
+  string-set: ears-top-center content();
+}
+
+.ears thead .right {
+  string-set: ears-top-right content();
+}
+
+.ears tfoot .left {
+  string-set: ears-bottom-left content();
+}
+
+.ears tfoot .center {
+  string-set: ears-bottom-center content();
+}
+
+.ears tfoot .right {
+  string-set: ears-bottom-right content();
+}
+*/
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+  /* The following is commented out here, but set appropriately by in code, as
+     the content depends on the document */
+  /*
+  @top-left {
+    content: 'Internet-Draft';
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-left {
+    content: string(ears-top-left);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-center {
+    content: string(ears-top-center);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @top-right {
+    content: string(ears-top-right);
+    vertical-align: bottom;
+    border-bottom: solid 1px #ccc;
+  }
+  @bottom-left {
+    content: string(ears-bottom-left);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-center {
+    content: string(ears-bottom-center);
+    vertical-align: top;
+    border-top: solid 1px #ccc;
+  }
+  @bottom-right {
+      content: '[Page ' counter(page) ']';
+      vertical-align: top;
+      border-top: solid 1px #ccc;
+  }
+  */
+
+}
+
+/* Changes introduced to fix issues found during implementation */
+/* Make sure links are clickable even if overlapped by following H* */
+a {
+  z-index: 2;
+}
+/* Separate body from document info even without intervening H1 */
+section {
+  clear: both;
+}
+
+
+/* Top align author divs, to avoid names without organization dropping level with org names */
+.author {
+  vertical-align: top;
+}
+
+/* Leave room in document info to show Internet-Draft on one line */
+#identifiers dt {
+  width: 8em;
+}
+
+/* Don't waste quite as much whitespace between label and value in doc info */
+#identifiers dd {
+  margin-left: 1em;
+}
+
+/* Give floating toc a background color (needed when it's a div inside section */
+#toc {
+  background-color: white;
+}
+
+/* Make the collapsed ToC header render white on gray also when it's a link */
+@media screen and (max-width: 1023px) {
+  #toc h2 a,
+  #toc h2 a:link,
+  #toc h2 a:focus,
+  #toc h2 a:hover,
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+}
+
+/* Give the bottom of the ToC some whitespace */
+@media screen and (min-width: 1024px) {
+  #toc {
+    padding: 0 0 1em 1em;
+  }
+}
+
+/* Style section numbers with more space between number and title */
+.section-number {
+  padding-right: 0.5em;
+}
+
+/* prevent monospace from becoming overly large */
+tt, code, pre {
+  font-size: 95%;
+}
+
+/* Fix the height/width aspect for ascii art*/
+.sourcecode pre,
+.art-text pre {
+  line-height: 1.12;
+}
+
+
+/* Add styling for a link in the ToC that points to the top of the document */
+a.toplink {
+  float: right;
+  margin-right: 0.5em;
+}
+
+/* Fix the dl styling to match the RFC 7992 attributes */
+dl > dt,
+dl.dlParallel > dt {
+  float: left;
+  margin-right: 1em;
+}
+dl.dlNewline > dt {
+  float: none;
+}
+
+/* Provide styling for table cell text alignment */
+table td.text-left,
+table th.text-left {
+  text-align: left;
+}
+table td.text-center,
+table th.text-center {
+  text-align: center;
+}
+table td.text-right,
+table th.text-right {
+  text-align: right;
+}
+
+/* Make the alternative author contact information look less like just another
+   author, and group it closer with the primary author contact information */
+.alternative-contact {
+  margin: 0.5em 0 0.25em 0;
+}
+address .non-ascii {
+  margin: 0 0 0 2em;
+}
+
+/* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+table {
+  width: auto;
+}
+
+/* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+.references dd {
+  overflow: visible;
+}
+
+/* Control caption placement */
+caption {
+  caption-side: bottom;
+}
+
+/* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+address.vcard {
+  max-width: 30em;
+  margin-right: auto;
+}
+
+/* For address alignment dependent on LTR or RTL scripts */
+address div.left {
+  text-align: left;
+}
+address div.right {
+  text-align: right;
+}
+
+/* Provide table alignment support.  We can't use the alignX classes above
+   since they do unwanted things with caption and other styling. */
+table.right {
+ margin-left: auto;
+ margin-right: 0;
+}
+table.center {
+ margin-left: auto;
+ margin-right: auto;
+}
+table.left {
+ margin-left: 0;
+ margin-right: auto;
+}
+
+/* Give the table caption label the same styling as the figcaption */
+caption a[href] {
+  color: #222;
+}
+
+@media print {
+  .toplink {
+    display: none;
+  }
+
+  /* avoid overwriting the top border line with the ToC header */
+  #toc {
+    padding-top: 1px;
+  }
+
+  /* Avoid page breaks inside dl and author address entries */
+  .vcard {
+    page-break-inside: avoid;
+  }
+
+}
+/* Tweak the bcp14 keyword presentation */
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+/* Tweak the invisible space above H* in order not to overlay links in text above */
+ h2 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 31px;
+ }
+ h3 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 24px;
+ }
+ h4 {
+  margin-top: -18px;  /* provide offset for in-page anchors */
+  padding-top: 24px;
+ }
+/* Float artwork pilcrow to the right */
+@media screen {
+  .artwork a.pilcrow {
+    display: block;
+    line-height: 0.7;
+    margin-top: 0.15em;
+  }
+}
+/* Make pilcrows on dd visible */
+@media screen {
+  dd:hover > a.pilcrow {
+    visibility: visible;
+  }
+}
+/* Make the placement of figcaption match that of a table's caption
+   by removing the figure's added bottom margin */
+.alignLeft.art-text,
+.alignCenter.art-text,
+.alignRight.art-text {
+   margin-bottom: 0;
+}
+.alignLeft,
+.alignCenter,
+.alignRight {
+  margin: 1em 0 0 0;
+}
+/* In print, the pilcrow won't show on hover, so prevent it from taking up space,
+   possibly even requiring a new line */
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+/* Styling for the external metadata */
+div#external-metadata {
+  background-color: #eee;
+  padding: 0.5em;
+  margin-bottom: 0.5em;
+  display: none;
+}
+div#internal-metadata {
+  padding: 0.5em;                       /* to match the external-metadata padding */
+}
+/* Styling for title RFC Number */
+h1#rfcnum {
+  clear: both;
+  margin: 0 0 -1em;
+  padding: 1em 0 0 0;
+}
+/* Make .olPercent look the same as <ol><li> */
+dl.olPercent > dd {
+  margin-bottom: 0.25em;
+  min-height: initial;
+}
+/* Give aside some styling to set it apart */
+aside {
+  border-left: 1px solid #ddd;
+  margin: 1em 0 1em 2em;
+  padding: 0.2em 2em;
+}
+aside > dl,
+aside > ol,
+aside > ul,
+aside > table,
+aside > p {
+  margin-bottom: 0.5em;
+}
+/* Additional page break settings */
+@media print {
+  figcaption, table caption {
+    page-break-before: avoid;
+  }
+}
+/* Font size adjustments for print */
+@media print {
+  body  { font-size: 10pt;      line-height: normal; max-width: 96%; }
+  h1    { font-size: 1.72em;    padding-top: 1.5em; } /* 1*1.2*1.2*1.2 */
+  h2    { font-size: 1.44em;    padding-top: 1.5em; } /* 1*1.2*1.2 */
+  h3    { font-size: 1.2em;     padding-top: 1.5em; } /* 1*1.2 */
+  h4    { font-size: 1em;       padding-top: 1.5em; }
+  h5, h6 { font-size: 1em;      margin: initial; padding: 0.5em 0 0.3em; }
+}
+/* Sourcecode margin in print, when there's no pilcrow */
+@media print {
+  .artwork,
+  .artwork > pre,
+  .sourcecode {
+    margin-bottom: 1em;
+  }
+}
+/* Avoid narrow tables forcing too narrow table captions, which may render badly */
+table {
+  min-width: 20em;
+}
+/* ol type a */
+ol.type-a { list-style-type: lower-alpha; }
+ol.type-A { list-style-type: upper-alpha; }
+ol.type-i { list-style-type: lower-roman; }
+ol.type-I { list-style-type: upper-roman; }
+/* Apply the print table and row borders in general, on request from the RPC,
+and increase the contrast between border and odd row background slightly */
+table {
+  border: 1px solid #ddd;
+}
+td {
+  border-top: 1px solid #ddd;
+}
+tr {
+  break-inside: avoid;
+}
+tr:nth-child(2n+1) > td {
+  background-color: #f8f8f8;
+}
+/* Use style rules to govern display of the TOC. */
+@media screen and (max-width: 1023px) {
+  #toc nav { display: none; }
+  #toc.active nav { display: block; }
+}
+/* Add support for keepWithNext */
+.keepWithNext {
+  break-after: avoid-page;
+  break-after: avoid-page;
+}
+/* Add support for keepWithPrevious */
+.keepWithPrevious {
+  break-before: avoid-page;
+}
+/* Change the approach to avoiding breaks inside artwork etc. */
+figure, pre, table, .artwork, .sourcecode  {
+  break-before: auto;
+  break-after: auto;
+}
+/* Avoid breaks between <dt> and <dd> */
+dl {
+  break-before: auto;
+  break-inside: auto;
+}
+dt {
+  break-before: auto;
+  break-after: avoid-page;
+}
+dd {
+  break-before: avoid-page;
+  break-after: auto;
+  orphans: 3;
+  widows: 3
+}
+span.break, dd.break {
+  margin-bottom: 0;
+  min-height: 0;
+  break-before: auto;
+  break-inside: auto;
+  break-after: auto;
+}
+/* Undo break-before ToC */
+@media print {
+  #toc {
+    break-before: auto;
+  }
+}
+/* Text in compact lists should not get extra bottom margin space,
+   since that would makes the list not compact */
+ul.compact p, .ulCompact p,
+ol.compact p, .olCompact p {
+ margin: 0;
+}
+/* But the list as a whole needs the extra space at the end */
+section ul.compact,
+section .ulCompact,
+section ol.compact,
+section .olCompact {
+  margin-bottom: 1em;                    /* same as p not within ul.compact etc. */
+}
+/* The tt and code background above interferes with for instance table cell
+   backgrounds.  Changed to something a bit more selective. */
+tt, code {
+  background-color: transparent;
+}
+p tt, p code, li tt, li code, dt tt, dt code {
+  background-color: #f8f8f8;
+}
+/* Tweak the pre margin -- 0px doesn't come out well */
+pre {
+   margin-top: 0.5px;
+}
+/* Tweak the compact list text */
+ul.compact, .ulCompact,
+ol.compact, .olCompact,
+dl.compact, .dlCompact {
+  line-height: normal;
+}
+/* Don't add top margin for nested lists */
+li > ul, li > ol, li > dl,
+dd > ul, dd > ol, dd > dl,
+dl > dd > dl {
+  margin-top: initial;
+}
+/* Elements that should not be rendered on the same line as a <dt> */
+/* This should match the element list in writer.text.TextWriter.render_dl() */
+dd > div.artwork:first-child,
+dd > aside:first-child,
+dd > blockquote:first-child,
+dd > figure:first-child,
+dd > ol:first-child,
+dd > div.sourcecode:first-child,
+dd > table:first-child,
+dd > ul:first-child {
+  clear: left;
+}
+/* fix for weird browser behaviour when <dd/> is empty */
+dt+dd:empty::before{
+  content: "\00a0";
+}
+/* Make paragraph spacing inside <li> smaller than in body text, to fit better within the list */
+li > p {
+  margin-bottom: 0.5em
+}
+/* Don't let p margin spill out from inside list items */
+li > p:last-of-type:only-child {
+  margin-bottom: 0;
+}
+</style>
+<link href="rfc-local.css" rel="stylesheet" type="text/css">
+<script type="application/javascript">async function addMetadata(){try{const e=document.styleSheets[0].cssRules;for(let t=0;t<e.length;t++)if(/#identifiers/.exec(e[t].selectorText)){const a=e[t].cssText.replace("#identifiers","#external-updates");document.styleSheets[0].insertRule(a,document.styleSheets[0].cssRules.length)}}catch(e){console.log(e)}const e=document.getElementById("external-metadata");if(e)try{var t,a="",o=function(e){const t=document.getElementsByTagName("meta");for(let a=0;a<t.length;a++)if(t[a].getAttribute("name")===e)return t[a].getAttribute("content");return""}("rfc.number");if(o){t="https://www.rfc-editor.org/rfc/rfc"+o+".json";try{const e=await fetch(t);a=await e.json()}catch(e){t=document.URL.indexOf("html")>=0?document.URL.replace(/html$/,"json"):document.URL+".json";const o=await fetch(t);a=await o.json()}}if(!a)return;e.style.display="block";const s="",d="https://datatracker.ietf.org/doc",n="https://datatracker.ietf.org/ipr/search",c="https://www.rfc-editor.org/info",l=a.doc_id.toLowerCase(),i=a.doc_id.slice(0,3).toLowerCase(),f=a.doc_id.slice(3).replace(/^0+/,""),u={status:"Status",obsoletes:"Obsoletes",obsoleted_by:"Obsoleted By",updates:"Updates",updated_by:"Updated By",see_also:"See Also",errata_url:"Errata"};let h="<dl style='overflow:hidden' id='external-updates'>";["status","obsoletes","obsoleted_by","updates","updated_by","see_also","errata_url"].forEach(e=>{if("status"==e){a[e]=a[e].toLowerCase();var t=a[e].split(" "),o=t.length,w="",p=1;for(let e=0;e<o;e++)p<o?w=w+r(t[e])+" ":w+=r(t[e]),p++;a[e]=w}else if("obsoletes"==e||"obsoleted_by"==e||"updates"==e||"updated_by"==e){var g,m="",b=1;g=a[e].length;for(let t=0;t<g;t++)a[e][t]&&(a[e][t]=String(a[e][t]).toLowerCase(),m=b<g?m+"<a href='"+s+"/rfc/".concat(a[e][t])+"'>"+a[e][t].slice(3)+"</a>, ":m+"<a href='"+s+"/rfc/".concat(a[e][t])+"'>"+a[e][t].slice(3)+"</a>",b++);a[e]=m}else if("see_also"==e){var y,L="",C=1;y=a[e].length;for(let t=0;t<y;t++)if(a[e][t]){a[e][t]=String(a[e][t]);var _=a[e][t].slice(0,3),v=a[e][t].slice(3).replace(/^0+/,"");L=C<y?"RFC"!=_?L+"<a href='"+s+"/info/"+_.toLowerCase().concat(v.toLowerCase())+"'>"+_+" "+v+"</a>, ":L+"<a href='"+s+"/info/"+_.toLowerCase().concat(v.toLowerCase())+"'>"+v+"</a>, ":"RFC"!=_?L+"<a href='"+s+"/info/"+_.toLowerCase().concat(v.toLowerCase())+"'>"+_+" "+v+"</a>":L+"<a href='"+s+"/info/"+_.toLowerCase().concat(v.toLowerCase())+"'>"+v+"</a>",C++}a[e]=L}else if("errata_url"==e){var R="";R=a[e]?R+"<a href='"+a[e]+"'>Errata exist</a> | <a href='"+d+"/"+l+"'>Datatracker</a>| <a href='"+n+"/?"+i+"="+f+"&submit="+i+"'>IPR</a> | <a href='"+c+"/"+l+"'>Info page</a>":"<a href='"+d+"/"+l+"'>Datatracker</a> | <a href='"+n+"/?"+i+"="+f+"&submit="+i+"'>IPR</a> | <a href='"+c+"/"+l+"'>Info page</a>",a[e]=R}""!=a[e]?"Errata"==u[e]?h+=`<dt>More info:</dt><dd>${a[e]}</dd>`:h+=`<dt>${u[e]}:</dt><dd>${a[e]}</dd>`:"Errata"==u[e]&&(h+=`<dt>More info:</dt><dd>${a[e]}</dd>`)}),h+="</dl>",e.innerHTML=h}catch(e){console.log(e)}else console.log("Could not locate metadata <div> element");function r(e){return e.charAt(0).toUpperCase()+e.slice(1)}}window.removeEventListener("load",addMetadata),window.addEventListener("load",addMetadata);</script>
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">Reaction to Renumbering Events</td>
+<td class="right">September 2025</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Gont, et al.</td>
+<td class="center">Expires 7 March 2026</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">IPv6 Maintenance (6man) Working Group</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-ietf-6man-slaac-renum-10</dd>
+<dt class="label-updates">Updates:</dt>
+<dd class="updates">
+<a href="https://www.rfc-editor.org/rfc/rfc4191" class="eref">4191</a>, <a href="https://www.rfc-editor.org/rfc/rfc4861" class="eref">4861</a>, <a href="https://www.rfc-editor.org/rfc/rfc4862" class="eref">4862</a>, <a href="https://www.rfc-editor.org/rfc/rfc8106" class="eref">8106</a> (if approved)</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2025-09-03" class="published">3 September 2025</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Standards Track</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2026-03-07">7 March 2026</time></dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">F. Gont</div>
+<div class="org">SI6 Networks</div>
+</div>
+<div class="author">
+      <div class="author-name">J. Zorz</div>
+<div class="org">6connect</div>
+</div>
+<div class="author">
+      <div class="author-name">R. Patterson</div>
+<div class="org">Sky UK</div>
+</div>
+<div class="author">
+      <div class="author-name">J. Linkova, <span class="editor">Ed.</span>
+</div>
+<div class="org">Google</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">Improving the Robustness of Stateless Address Autoconfiguration (SLAAC) to Flash Renumbering Events</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">In scenarios where network configuration information becomes invalid without explicit notification to the local network, local hosts may end up employing stale information for an unacceptably long period of time, thus resulting in interoperability problems. This document improves the reaction of IPv6 Stateless Address Autoconfiguration to such configuration changes. It formally updates RFC 4191, RFC 4861, RFC 4862, and RFC 8106.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 7 March 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2025 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-requirements-language" class="internal xref">Requirements Language</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1" class="keepWithNext"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-terminology" class="internal xref">Terminology</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-slaac-reaction-to-flash-ren" class="internal xref">SLAAC reaction to Flash-renumbering Events</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-renumbering-without-explici" class="internal xref">Renumbering without Explicit Signaling</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
+                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="auto internal xref">4.2</a>.  <a href="#name-renumbering-with-explicit-s" class="internal xref">Renumbering with Explicit Signaling</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-improvements-to-stateless-a" class="internal xref">Improvements to Stateless Address Autoconfiguration (SLAAC)</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-more-appropriate-neighbor-d" class="internal xref">More Appropriate Neighbor Discovery Option Lifetimes</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-signaling-stale-configurati" class="internal xref">Signaling Stale Configuration Information</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.3">
+                <p id="section-toc.1-1.5.2.3.1"><a href="#section-5.3" class="auto internal xref">5.3</a>.  <a href="#name-propagating-interface-confi" class="internal xref">Propagating Interface Configuration Changes</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.4">
+                <p id="section-toc.1-1.5.2.4.1"><a href="#section-5.4" class="auto internal xref">5.4</a>.  <a href="#name-honor-small-pio-valid-lifet" class="internal xref">Honor Small PIO Valid Lifetimes</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.5">
+                <p id="section-toc.1-1.5.2.5.1"><a href="#section-5.5" class="auto internal xref">5.5</a>.  <a href="#name-conveying-information-in-ro" class="internal xref">Conveying Information in Router Advertisement (RA) Messages</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-implementation-status" class="internal xref">Implementation Status</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="auto internal xref">7.1</a>.  <a href="#name-more-appropriate-lifetime-v" class="internal xref">More Appropriate Lifetime Values</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1.2.1">
+                    <p id="section-toc.1-1.7.2.1.2.1.1"><a href="#section-7.1.1" class="auto internal xref">7.1.1</a>.  <a href="#name-router-configuration-variab" class="internal xref">Router Configuration Variables</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="auto internal xref">7.2</a>.  <a href="#name-honor-small-pio-valid-lifeti" class="internal xref">Honor Small PIO Valid Lifetimes</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2.2.1">
+                    <p id="section-toc.1-1.7.2.2.2.1.1"><a href="#section-7.2.1" class="auto internal xref">7.2.1</a>.  <a href="#name-linux-kernel" class="internal xref">Linux Kernel</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2.2.2">
+                    <p id="section-toc.1-1.7.2.2.2.2.1"><a href="#section-7.2.2" class="auto internal xref">7.2.2</a>.  <a href="#name-networkmanager" class="internal xref">NetworkManager</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3">
+                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-conveying-information-in-rou" class="internal xref">Conveying Information in Router Advertisement (RA) Messages</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4">
+                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="auto internal xref">7.4</a>.  <a href="#name-recovery-from-stale-configu" class="internal xref">Recovery from Stale Configuration Information without Explicit Signaling</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4.2.1">
+                    <p id="section-toc.1-1.7.2.4.2.1.1"><a href="#section-7.4.1" class="auto internal xref">7.4.1</a>.  <a href="#name-dhcpcd8" class="internal xref">dhcpcd(8)</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.5">
+                <p id="section-toc.1-1.7.2.5.1"><a href="#section-7.5" class="auto internal xref">7.5</a>.  <a href="#name-other-mitigations-implement" class="internal xref">Other mitigations implemented in products</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#section-10" class="auto internal xref">10</a>. <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.1">
+                <p id="section-toc.1-1.10.2.1.1"><a href="#section-10.1" class="auto internal xref">10.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.2">
+                <p id="section-toc.1-1.10.2.2.1"><a href="#section-10.2" class="auto internal xref">10.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-selecting-neighbor-discover" class="internal xref">Selecting Neighbor Discovery Lifetimes</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="intro">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">In scenarios where network configuration information becomes invalid without explicit notification to the local network, local hosts may end up employing stale information for an unacceptably long period of time, resulting in interoperability problems. This issue has been discussed in detail in <span>[<a href="#RFC8978" class="cite xref">RFC8978</a>]</span>.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">This document updates the Neighbor Discovery specification <span>[<a href="#RFC4861" class="cite xref">RFC4861</a>]</span>, the Stateless Address Autoconfiguration (SLAAC) specification <span>[<a href="#RFC4862" class="cite xref">RFC4862</a>]</span>, and other associated specifications (<span>[<a href="#RFC4191" class="cite xref">RFC4191</a>]</span> and <span>[<a href="#RFC8106" class="cite xref">RFC8106</a>]</span>), such that hosts can more gracefully deal with the so-called flash renumbering events <span>[<a href="#RFC8978" class="cite xref">RFC8978</a>]</span>, thus improving the robustness of SLAAC.<a href="#section-1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="rfc2119">
+<section id="section-2">
+      <h2 id="name-requirements-language">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-requirements-language" class="section-name selfRef">Requirements Language</a>
+      </h2>
+<p id="section-2-1">The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED",
+      "MAY", and "OPTIONAL" in this document are to be interpreted as
+      described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
+      appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="term">
+<section id="section-3">
+      <h2 id="name-terminology">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-terminology" class="section-name selfRef">Terminology</a>
+      </h2>
+<span class="break"></span><dl class="dlNewline" id="section-3-1">
+        <dt id="section-3-1.1">DHCPv6-PD:</dt>
+        <dd style="margin-left: 1.5em" id="section-3-1.2">DHCPv6 Prefix Delegation <span>[<a href="#RFC8415" class="cite xref">RFC8415</a>]</span>; a mechanism to delegate IPv6 prefixes to clients.<a href="#section-3-1.2" class="pilcrow">¶</a>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-3-1.3">Flash renumbering:</dt>
+        <dd style="margin-left: 1.5em" id="section-3-1.4">A network renumbering event, when an old prefix, used to address hosts, becomes invalid and is replaced by a new prefix. Before the flash renumbering event only the old prefix provides connectivity, and after the flash renumbering only the new one can be used. In other words, there is no period of time when addresses from both prefixes provide connectivity. See <span>[<a href="#RFC8978" class="cite xref">RFC8978</a>]</span> for more detailed discussion of various flash-renumbering scenarios. Note: typically, when flash-renumbering events occur, other IPv6 netowrk configuration information (such as Recursive DNS Server (RDNSS) information <span>[<a href="#RFC8106" class="cite xref">RFC8106</a>]</span>) is affected in the same manner, and thus the term "flash-renumbering" is also employed to refer to a more general "flash-reconfiguration" event.<a href="#section-3-1.4" class="pilcrow">¶</a>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-3-1.5">PIO:</dt>
+        <dd style="margin-left: 1.5em" id="section-3-1.6">Prefix Information Option, <span>[<a href="#RFC4861" class="cite xref">RFC4861</a>]</span>,<a href="#section-3-1.6" class="pilcrow">¶</a>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-3-1.7">RA:</dt>
+        <dd style="margin-left: 1.5em" id="section-3-1.8">Router Advertisement, <span>[<a href="#RFC4861" class="cite xref">RFC4861</a>]</span>.<a href="#section-3-1.8" class="pilcrow">¶</a>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-3-1.9">SLAAC:</dt>
+        <dd style="margin-left: 1.5em" id="section-3-1.10">IPv6 Stateless Address AutoConfugration, <span>[<a href="#RFC4862" class="cite xref">RFC4862</a>]</span>.<a href="#section-3-1.10" class="pilcrow">¶</a>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-3-1.11">SLAAC host:</dt>
+        <dd style="margin-left: 1.5em" id="section-3-1.12">A host which employs SLAAC for IPv6 network configuration.<a href="#section-3-1.12" class="pilcrow">¶</a>
+</dd>
+        <dd class="break"></dd>
+<dt id="section-3-1.13">SLAAC Router:</dt>
+        <dd style="margin-left: 1.5em" id="section-3-1.14">A IPv6 router that advertises configuration information via SLAAC.<a href="#section-3-1.14" class="pilcrow">¶</a>
+</dd>
+      <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="problem">
+<section id="section-4">
+      <h2 id="name-slaac-reaction-to-flash-ren">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-slaac-reaction-to-flash-ren" class="section-name selfRef">SLAAC reaction to Flash-renumbering Events</a>
+      </h2>
+<p id="section-4-1">In some flash-renumbering scenarios, the local router may try to deprecate the stale information by explicitly signaling the network about the renumbering event, whereas in other scenarios the renumbering event may happen inadvertently, without the router explicitly signaling the scenario to local hosts. The following subsections analyze specific considerations for each of these scenarios.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<section id="section-4.1">
+        <h3 id="name-renumbering-without-explici">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-renumbering-without-explici" class="section-name selfRef">Renumbering without Explicit Signaling</a>
+        </h3>
+<p id="section-4.1-1">In the absence of explicit signalling from SLAAC routers, stale SLAAC configuration information will employed as allowed by the associated lifetimes values. For example, stale prefixes will remain preferred and valid according to the Preferred Lifetime and Valid Lifetime parameters (respectively) of the last received Prefix Information Option (PIO). <span>[<a href="#RFC4861" class="cite xref">RFC4861</a>]</span> specifies the following default values for PIOs:<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.1-2.1">
+            <p id="section-4.1-2.1.1">Preferred Lifetime (AdvPreferredLifetime): 604800 seconds (7 days)<a href="#section-4.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.1-2.2">
+            <p id="section-4.1-2.2.1">Valid Lifetime (AdvValidLifetime): 2592000 seconds (30 days)<a href="#section-4.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-4.1-3">This means that, in the absence of explicit signaling by a SLAAC router to deprecate a prefix, it will take a host 7 days (one week) to deprecate the corresponding addresses, and 30 days (one month) to eventually remove any addresses configured for the stale prefix. Clearly, employing such long default values is unacceptable for most deployment scenarios that may experience flash-renumbering events.<a href="#section-4.1-3" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlNewline" id="section-4.1-4">
+          <dt id="section-4.1-4.1">NOTE:</dt>
+          <dd style="margin-left: 1.5em" id="section-4.1-4.2">
+            <span>[<a href="#RFC8978" class="cite xref">RFC8978</a>]</span> provides an operational recommendation for Customer Edge (CE) routers to override the standard default Preferred Lifetime (AdvPreferredLifetime) and Valid Lifetime (AdvValidLifetime) to 2700 seconds (45 minutes) and 5400 seconds (90 minutes), respectively, thus improving the state of affairs for CE router scenarios.<a href="#section-4.1-4.2" class="pilcrow">¶</a>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="section-4.1-5">Similarly, other Neighbor Discovery options employ long default lifetimes that are unacceptable for most deployment scenarios where flash-renumbering events may be experienced.<a href="#section-4.1-5" class="pilcrow">¶</a></p>
+<p id="section-4.1-6">Use of more appropriate timers in Router Advertisement messages can help limit the amount of time that hosts will maintain stale configuration information. Thus, <a href="#timers" class="auto internal xref">Section 5.1</a> specifies more appropriate (i.e., shorter) default lifetimes for Neighbor Discovery options. <a href="#ras" class="auto internal xref">Section 5.5</a> provides recommendations about conveying Neighbor Discovery information into RA messages, to help hosts infer when information may have become stale.<a href="#section-4.1-6" class="pilcrow">¶</a></p>
+</section>
+<section id="section-4.2">
+        <h3 id="name-renumbering-with-explicit-s">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-renumbering-with-explicit-s" class="section-name selfRef">Renumbering with Explicit Signaling</a>
+        </h3>
+<p id="section-4.2-1">In scenarios where a local router is aware of the renumbering event, it may try to phase out the stale network configuration information. In these scenarios, there are two aspects to be considered:<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.2-2.1">
+            <p id="section-4.2-2.1.1">The amount of time during which the router should continue trying to deprecate the stale network configuration information.<a href="#section-4.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.2-2.2">
+            <p id="section-4.2-2.2.1">The ability of SLAAC hosts to phase out stale configuration.<a href="#section-4.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-4.2-3">Since the network could become partitioned at any point in time and for an arbitrarily long period of time, in order to reliably deprecate stale information, a router should try to deprecate such information for its maximum possible lifespan.<a href="#section-4.2-3" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlNewline" id="section-4.2-4">
+          <dt id="section-4.2-4.1">NOTE:</dt>
+          <dd style="margin-left: 1.5em" id="section-4.2-4.2">
+For example, a router should try to deprecate a prefix (via a PIO) for a period of time equal to the "Preferred Lifetime" used when advertising the prefix, and try to invalidate the prefix for a period of time equal to the "Valid Lifetime" used when advertising the prefix.<a href="#section-4.2-4.2" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-4.2-4.3"></dt>
+          <dd style="margin-left: 1.5em" id="section-4.2-4.4">
+Once the number of seconds in the original "Preferred Lifetime" have elapsed, all hosts will have deprecated the corresponding addresses, while once the number of seconds in the "Valid Lifetime" have elapsed, the corresponding addresses will have been invalidated and removed.<a href="#section-4.2-4.4" class="pilcrow">¶</a>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="section-4.2-5">Thus, use of more appropriate default lifetimes for Neighbor Discovery options, as specified in <a href="#timers" class="auto internal xref">Section 5.1</a>, will reduce the amount of time stale options would need to be advertised by a router to ensure that the associated information is reliably phased out.<a href="#section-4.2-5" class="pilcrow">¶</a></p>
+<p id="section-4.2-6">In the case of PIOs, in scenarios where a router has positive knowledge that a prefix has become invalid (and thus could signal this condition to local hosts), the current specifications will prevent SLAAC hosts from fully recovering from such stale information: Item "e)" of Section 5.5.3 of <span>[<a href="#RFC4862" class="cite xref">RFC4862</a>]</span> specifies that an RA may never reduce the "RemainingLifetime" to less than 2 hours. Additionally, if the "RemainingLifetime" of an address is less than 2 hours, then a "Valid Lifetime" less than 2 hours will be ignored. The inability to invalidate a stale prefix may prevent communications with the new "owners" of a prefix, and thus is highly undesirable. On the other hand, the Preferred Lifetime of an address may be reduced to any value to avoid the use of addresses from a stale prefix for new communications.<a href="#section-4.2-6" class="pilcrow">¶</a></p>
+<p id="section-4.2-7"><a href="#sig-stale-config" class="auto internal xref">Section 5.4</a> formally updates <span>[<a href="#RFC4862" class="cite xref">RFC4862</a>]</span> to remove this restriction, such that hosts may react to the advertised "Valid Lifetime" even if it is less than 2 hours. <a href="#init" class="auto internal xref">Section 5.3</a> recommends that routers disseminate network configuration information when a network interface is initialized or reconfigured, such that configuration information propagates in a timelier manner.<a href="#section-4.2-7" class="pilcrow">¶</a></p>
+</section>
+</section>
+</div>
+<div id="slaac-improvements">
+<section id="section-5">
+      <h2 id="name-improvements-to-stateless-a">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-improvements-to-stateless-a" class="section-name selfRef">Improvements to Stateless Address Autoconfiguration (SLAAC)</a>
+      </h2>
+<p id="section-5-1">
+The following subsections update <span>[<a href="#RFC4191" class="cite xref">RFC4191</a>]</span>, <span>[<a href="#RFC4861" class="cite xref">RFC4861</a>]</span>, <span>[<a href="#RFC4862" class="cite xref">RFC4862</a>]</span>, and <span>[<a href="#RFC8106" class="cite xref">RFC8106</a>]</span>, such that the problem discussed in this document is mitigated. Each of the following subsections improve different aspects of SLAAC, and thus are mostly orthogonal:<a href="#section-5-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5-2.1">
+          <p id="section-5-2.1.1">Reduce the default lifetimes of Neighbor Discovery options (<a href="#timers" class="auto internal xref">Section 5.1</a>):<a href="#section-5-2.1.1" class="pilcrow">¶</a></p>
+<p id="section-5-2.1.2">This helps limit the amount of time a host may employ stale information, and also limits the amount of time a router should try to deprecate stale information.<a href="#section-5-2.1.2" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-5-2.2">
+          <p id="section-5-2.2.1">Signal Stale Configuration Information (<a href="#sig-stale-config-2" class="auto internal xref">Section 5.2</a>):<a href="#section-5-2.2.1" class="pilcrow">¶</a></p>
+<p id="section-5-2.2.2">This allows local hosts to learn about stale configuration information in a timelier manner.<a href="#section-5-2.2.2" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-5-2.3">
+          <p id="section-5-2.3.1">Honor PIOs with small Valid Lifetimes (<a href="#sig-stale-config" class="auto internal xref">Section 5.4</a>):<a href="#section-5-2.3.1" class="pilcrow">¶</a></p>
+<p id="section-5-2.3.2">This allows hosts to honor PIOs with a Valid Lifetime less than 2 hours, thus resulting in a timelier reaction to flash-renumbering events.<a href="#section-5-2.3.2" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-5-2.4">
+          <p id="section-5-2.4.1">Recommend routers to retransmit configuration information upon interface initialization/reconfiguration (<a href="#init" class="auto internal xref">Section 5.3</a>):<a href="#section-5-2.4.1" class="pilcrow">¶</a></p>
+<p id="section-5-2.4.2">This helps spread the network configuration information in a timelier manner.<a href="#section-5-2.4.2" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-5-2.5">
+          <p id="section-5-2.5.1">Recommend routers to always send all options (i.e. the complete configuration information) in RA messages, and in the smallest possible number of packets (<a href="#ras" class="auto internal xref">Section 5.5</a>):<a href="#section-5-2.5.1" class="pilcrow">¶</a></p>
+<p id="section-5-2.5.2">This helps propagate the same information to all hosts.<a href="#section-5-2.5.2" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<div id="timers">
+<section id="section-5.1">
+        <h3 id="name-more-appropriate-neighbor-d">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-more-appropriate-neighbor-d" class="section-name selfRef">More Appropriate Neighbor Discovery Option Lifetimes</a>
+        </h3>
+<p id="section-5.1-1">This document defines the following variables to be employed for the default lifetimes of Neighbor Discovery options:<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<ul class="normal"><li class="normal" id="section-5.1-2.1">
+            <p id="section-5.1-2.1.1">ND_PREFERRED_LIFETIME: ND_RAS_PREFERRED * MaxRtrAdvInterval<a href="#section-5.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.1-2.2">
+            <p id="section-5.1-2.2.1">ND_VALID_LIFETIME: ND_RAS_VALID * MaxRtrAdvInterval<a href="#section-5.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.1-3">where:<a href="#section-5.1-3" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlNewline" id="section-5.1-4">
+          <dt id="section-5.1-4.1">ND_PREFERRED_LIFETIME:</dt>
+          <dd style="margin-left: 1.5em" id="section-5.1-4.2">Preferred lifetime for Neighbor Discovery information (where applicable). When the default values for ND_RAS_PREFERRED and MaxRtrAdvInterval are employed, it results in 2700 seconds.<a href="#section-5.1-4.2" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-5.1-4.3">ND_VALID_LIFETIME:</dt>
+          <dd style="margin-left: 1.5em" id="section-5.1-4.4">Valid lifetime for Neighbor Discovery information (where applicable). When the default values for ND_RAS_PREFERRED and MaxRtrAdvInterval are employed, it results in 3600 seconds.<a href="#section-5.1-4.4" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-5.1-4.5">ND_RAS_PREFERRED:</dt>
+          <dd style="margin-left: 1.5em" id="section-5.1-4.6">Number of RA messages sent during the ND_PREFERRED_LIFETIME period. It defaults to 9.<a href="#section-5.1-4.6" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-5.1-4.7">MaxRtrAdvInterval:</dt>
+          <dd style="margin-left: 1.5em" id="section-5.1-4.8">Maximum time allowed between sending unsolicited multicast Router Advertisements from the interface, in seconds (as specified in <span>[<a href="#RFC4861" class="cite xref">RFC4861</a>]</span>. It defaults to 300 seconds.<a href="#section-5.1-4.8" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-5.1-4.9">ND_RAS_VALID:</dt>
+          <dd style="margin-left: 1.5em" id="section-5.1-4.10">Number of RA messages sent during the ND_VALID_LIFETIME. It defaults to 12.<a href="#section-5.1-4.10" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd></dl>
+<span class="break"></span><dl class="dlNewline" id="section-5.1-5">
+          <dt id="section-5.1-5.1">NOTES:</dt>
+          <dd style="margin-left: 1.5em" id="section-5.1-5.2">
+ND_RAS_PREFERRED and ND_RAS_VALID should be computed with the expression: n &gt;= ln(1 - P)/ln(Loss), where P represents the desired probability of receiving at least one RA for an RA loss rate of "Loss". This expression is further discussed in <a href="#expression" class="auto internal xref">Appendix A</a>.<a href="#section-5.1-5.2" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-5.1-5.3"></dt>
+          <dd style="margin-left: 1.5em" id="section-5.1-5.4">ND_RAS_PREFERRED defaults to 9. We note that for e.g. for an RA loss rate of 50% (Loss=0.50), this would result in a probability of hosts refreshing this timer before it expires of 0.99805. We note that if the Preferred Lifetime expires, and the host has configured addresses for other prefixes, it will start preferring those other addresses instead. On the other hand, if the host has not configured addresses for other prefixes, it may still employ addresses even if they are not "Preferred" (please see Section 5.5.4 of <span>[<a href="#RFC4862" class="cite xref">RFC4862</a>]</span>). Implementations MAY override the default value of ND_RAS_PREFERRED according to the considerations in <a href="#expression" class="auto internal xref">Appendix A</a>.<a href="#section-5.1-5.4" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-5.1-5.5"></dt>
+          <dd style="margin-left: 1.5em" id="section-5.1-5.6">ND_RAS_VALID defaults to 12. We note that for e.g. an RA loss rate of 50% (Loss=0.50), this would result in a probability of hosts refreshing this timer before it expires of 0.99975. Implementations MAY override the default value of ND_RAS_PREFERRED according to the considerations in <a href="#expression" class="auto internal xref">Appendix A</a>.<a href="#section-5.1-5.6" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd></dl>
+<p id="section-5.1-6">This document formally updates <span>[<a href="#RFC4861" class="cite xref">RFC4861</a>]</span> to modify the default value of the Router Lifetime field of RA messages as follows:<a href="#section-5.1-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.1-7.1">
+            <p id="section-5.1-7.1.1">AdvDefaultLifetime: ND_VALID_LIFETIME<a href="#section-5.1-7.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<span class="break"></span><dl class="dlNewline" id="section-5.1-8">
+          <dt id="section-5.1-8.1">NOTE:</dt>
+          <dd style="margin-left: 1.5em" id="section-5.1-8.2">
+This is to align the Router Lifetime with the recommendations in <span>[<a href="#RFC7772" class="cite xref">RFC7772</a>]</span>.<a href="#section-5.1-8.2" class="pilcrow">¶</a>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="section-5.1-9">This document formally updates <span>[<a href="#RFC4861" class="cite xref">RFC4861</a>]</span> to modify the default values of the Preferred Lifetime and the Valid Lifetime of PIOs as follows:<a href="#section-5.1-9" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.1-10.1">
+            <p id="section-5.1-10.1.1">AdvPreferredLifetime: ND_PREFERRED_LIFETIME<a href="#section-5.1-10.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.1-10.2">
+            <p id="section-5.1-10.2.1">AdvValidLifetime: ND_VALID_LIFETIME<a href="#section-5.1-10.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.1-11">This document formally updates <span>[<a href="#RFC4191" class="cite xref">RFC4191</a>]</span> to specify the default Route Lifetime of Route Information Options (RIOs) as follows:<a href="#section-5.1-11" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.1-12.1">
+            <p id="section-5.1-12.1.1">Route Lifetime: It defaults to ND_VALID_LIFETIME<a href="#section-5.1-12.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.1-13">This document formally updates <span>[<a href="#RFC8106" class="cite xref">RFC8106</a>]</span> to modify the default Lifetime of Recursive DNS Server Options as:<a href="#section-5.1-13" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.1-14.1">
+            <p id="section-5.1-14.1.1">Lifetime: It defaults to ND_VALID_LIFETIME<a href="#section-5.1-14.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-5.1-15">Additionally, this document formally updates <span>[<a href="#RFC8106" class="cite xref">RFC8106</a>]</span> to modify the default Lifetime of DNS Search List Options as:<a href="#section-5.1-15" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.1-16.1">
+            <p id="section-5.1-16.1.1">Lifetime: It defaults to ND_VALID_LIFETIME<a href="#section-5.1-16.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="sig-stale-config-2">
+<section id="section-5.2">
+        <h3 id="name-signaling-stale-configurati">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-signaling-stale-configurati" class="section-name selfRef">Signaling Stale Configuration Information</a>
+        </h3>
+<p id="section-5.2-1">In some scenarios, a SLAAC router may learn that previously advertised information has become stale. For example, this may happen when e.g. the advertised information is derived from information that has been dynamically learned from an upstream router via DHCPv6-PD, but the upstream router is no longer in use or available. In such scenarios, it is paramount that the SLAAC router signals the SLAAC configuration information change, to aid hosts in quickly phasing out the stale network configuration information.<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+<p id="section-5.2-2">SLAAC routers MUST signal stale configuration information by following the guidelines in Section 3.5 ("Signaling Stale Configuration Information") of <span>[<a href="#RFC9096" class="cite xref">RFC9096</a>]</span>.<a href="#section-5.2-2" class="pilcrow">¶</a></p>
+<p id="section-5.2-3">In scenarios where flash renumbering events or configuration changes are frequent, a router may end up in a situation where multiple pieces of information may need to be simultaneously deprecated, and thus the size of Router Advertisement messages could substantially increase. In such scenarios, routers MAY limit themselves to deprecate the most recent configuration that would fit into a single Router Advertisement message without fragmentation.<a href="#section-5.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="init">
+<section id="section-5.3">
+        <h3 id="name-propagating-interface-confi">
+<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-propagating-interface-confi" class="section-name selfRef">Propagating Interface Configuration Changes</a>
+        </h3>
+<p id="section-5.3-1">When the information to be contained in RAs changes (e.g. an interface is reconfigured), it is paramount that updated information is propagated to hosts connected to the corresponding network in a timely manner. Thus, this document replaces the following text from Section 6.2.4 of <span>[<a href="#RFC4861" class="cite xref">RFC4861</a>]</span>:<a href="#section-5.3-1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-5.3-2">
+          <dt id="section-5.3-2.1"></dt>
+          <dd style="margin-left: 1.5em" id="section-5.3-2.2">
+   The information contained in Router Advertisements may change through
+   actions of system management.  For instance, the lifetime of
+   advertised prefixes may change, new prefixes could be added, a router
+   could cease to be a router (i.e., switch from being a router to being
+   a host), etc.  In such cases, the router MAY transmit up to
+   MAX_INITIAL_RTR_ADVERTISEMENTS unsolicited advertisements, using the
+   same rules as when an interface becomes an advertising interface.<a href="#section-5.3-2.2" class="pilcrow">¶</a>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="section-5.3-3">
+
+with:<a href="#section-5.3-3" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-5.3-4">
+          <dt id="section-5.3-4.1"></dt>
+          <dd style="margin-left: 1.5em" id="section-5.3-4.2">
+   The information contained in Router Advertisements may change through
+   actions of system management, or because it is derived from information
+   learned from an upstream router (via e.g. DHCPv6 [RFC8415]), and such 
+   information has changed. For instance, the lifetime of advertised prefixes may 
+   change, new prefixes could be added, existing prefixes could be removed,
+   a router could cease to be a router (i.e., switch from being a router to being
+   a host), etc.  In such cases, the router MUST transmit 
+   MAX_INITIAL_RTR_ADVERTISEMENTS unsolicited advertisements, using the
+   same rules as when an interface becomes an advertising interface.<a href="#section-5.3-4.2" class="pilcrow">¶</a>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<span class="break"></span><dl class="dlParallel" id="section-5.3-5">
+          <dt id="section-5.3-5.1">RATIONALE:</dt>
+          <dd style="margin-left: 1.5em" id="section-5.3-5.2">
+            <ul class="normal">
+<li class="normal" id="section-5.3-5.2.1.1">
+                <p id="section-5.3-5.2.1.1.1">Use of stale information can lead to interoperability problems. Therefore, it is important that new configuration information propagates in a timelier manner to all hosts.<a href="#section-5.3-5.2.1.1.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="sig-stale-config">
+<section id="section-5.4">
+        <h3 id="name-honor-small-pio-valid-lifet">
+<a href="#section-5.4" class="section-number selfRef">5.4. </a><a href="#name-honor-small-pio-valid-lifet" class="section-name selfRef">Honor Small PIO Valid Lifetimes</a>
+        </h3>
+<p id="section-5.4-1">This document introduces the following update to Section 5.5.3 of <span>[<a href="#RFC4862" class="cite xref">RFC4862</a>]</span>:<a href="#section-5.4-1" class="pilcrow">¶</a></p>
+<p id="section-5.4-2">OLD TEXT:<a href="#section-5.4-2" class="pilcrow">¶</a></p>
+<p id="section-5.4-3">=======<a href="#section-5.4-3" class="pilcrow">¶</a></p>
+<p id="section-5.4-4">
+e)  If the advertised prefix is equal to the prefix of an address
+      configured by stateless autoconfiguration in the list, the
+      preferred lifetime of the address is reset to the Preferred
+      Lifetime in the received advertisement.  The specific action to
+      perform for the valid lifetime of the address depends on the Valid
+      Lifetime in the received advertisement and the remaining time to
+      the valid lifetime expiration of the previously autoconfigured
+      address.  We call the remaining time "RemainingLifetime" in the
+      following discussion:<a href="#section-5.4-4" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-5.4-5">
+          <dt id="section-5.4-5.1"></dt>
+          <dd style="margin-left: 1.5em" id="section-5.4-5.2">
+1. If the received Valid Lifetime is greater than 2 hours or greater than RemainingLifetime, set the valid lifetime of the corresponding address to the advertised Valid Lifetime.<a href="#section-5.4-5.2" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-5.4-5.3"></dt>
+          <dd style="margin-left: 1.5em" id="section-5.4-5.4">
+2. If RemainingLifetime is less than or equal to 2 hours, ignore the Prefix Information option with regards to the valid lifetime, unless the Router Advertisement from which this option was obtained has been authenticated (e.g., via Secure Neighbor Discovery <span>[<a href="#RFC3971" class="cite xref">RFC3971</a>]</span>).  If the Router Advertisement was authenticated, the valid lifetime of the corresponding address should be set to the Valid Lifetime in the received option.<a href="#section-5.4-5.4" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-5.4-5.5"></dt>
+          <dd style="margin-left: 1.5em" id="section-5.4-5.6">
+3. Otherwise, reset the valid lifetime of the corresponding address to 2 hours.<a href="#section-5.4-5.6" class="pilcrow">¶</a>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="section-5.4-6">
+The above rules address a specific denial-of-service attack in
+      which a bogus advertisement could contain prefixes with very small
+      Valid Lifetimes.  Without the above rules, a single
+      unauthenticated advertisement containing bogus Prefix Information
+      options with short Valid Lifetimes could cause all of a node's
+      addresses to expire prematurely.  The above rules ensure that
+      legitimate advertisements (which are sent periodically) will
+      "cancel" the short Valid Lifetimes before they actually take
+      effect.<a href="#section-5.4-6" class="pilcrow">¶</a></p>
+<p id="section-5.4-7">
+      Note that the preferred lifetime of the corresponding address is
+      always reset to the Preferred Lifetime in the received Prefix
+      Information option, regardless of whether the valid lifetime is
+      also reset or ignored.  The difference comes from the fact that
+      the possible attack for the preferred lifetime is relatively
+      minor.  Additionally, it is even undesirable to ignore the
+      preferred lifetime when a valid administrator wants to deprecate a
+      particular address by sending a short preferred lifetime (and the
+      valid lifetime is ignored by accident).<a href="#section-5.4-7" class="pilcrow">¶</a></p>
+<p id="section-5.4-8">=======<a href="#section-5.4-8" class="pilcrow">¶</a></p>
+<p id="section-5.4-9">NEW TEXT:<a href="#section-5.4-9" class="pilcrow">¶</a></p>
+<p id="section-5.4-10">=======<a href="#section-5.4-10" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-5.4-11">
+          <dt id="section-5.4-11.1"></dt>
+          <dd style="margin-left: 1.5em" id="section-5.4-11.2">e)  If the advertised prefix is equal to the prefix of an address
+      configured by stateless autoconfiguration in the list, the
+      valid lifetime and the preferred lifetime of the address should 
+      be updated by processing the Valid Lifetime and the Preferred
+      Lifetime (respectively) in the received advertisement.<a href="#section-5.4-11.2" class="pilcrow">¶</a>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="section-5.4-12">
+While allowing updates to the valid lifetime in RAs could enable an attacker to invalidate addresses by setting the valid lifetime to zero, this does not significantly worsen the security situation. An attacker capable of sending rogue RAs already has the power to disrupt connectivity by manipulating other parameters, such as gateway or DNS information.  Therefore, accepting a zero lifetime does not make the system more vulnerable than it already is, as invalidating the prefix is just one of the many vectors available to perform DoS attacks to on-link node (see <span>[<a href="#RFC3756" class="cite xref">RFC3756</a>]</span>).<a href="#section-5.4-12" class="pilcrow">¶</a></p>
+<p id="section-5.4-13">
+In scenarios where RA-based attacks are of concern, mitigations such as RA-Guard <span>[<a href="#RFC6105" class="cite xref">RFC6105</a>]</span> <span>[<a href="#RFC7113" class="cite xref">RFC7113</a>]</span> or SEND <span>[<a href="#RFC3971" class="cite xref">RFC3971</a>]</span> should be implemented.<a href="#section-5.4-13" class="pilcrow">¶</a></p>
+<p id="section-5.4-14">=======<a href="#section-5.4-14" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-5.4-15">
+          <dt id="section-5.4-15.1">RATIONALE:</dt>
+          <dd style="margin-left: 1.5em" id="section-5.4-15.2">
+            <ul class="normal">
+<li class="normal" id="section-5.4-15.2.1.1">
+                <p id="section-5.4-15.2.1.1.1">
+This change allows hosts to react to the signal provided by a router that has positive knowledge that a prefix is not assigned to the given link anymore. In particular it would allow the host to invalidate addresses from that prefix, and, if the prefix is reassigned to another link, allows the host to communicate to devices on that link.<a href="#section-5.4-15.2.1.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.4-15.2.1.2">
+                <p id="section-5.4-15.2.1.2.1">
+The behavior described in <span>[<a href="#RFC4862" class="cite xref">RFC4862</a>]</span> had been incorporated during
+         the revision of the original IPv6 Stateless Address
+         Autoconfiguration specification (<span>[<a href="#RFC1971" class="cite xref">RFC1971</a>]</span>). At the time, the
+         IPNG working group decided to mitigate the attack vector
+         represented by Prefix Information Options with very short
+         lifetimes, on the premise that these packets represented a bigger
+         risk than other ND-based attack vectors <span>[<a href="#IPNG-minutes" class="cite xref">IPNG-minutes</a>]</span>.<a href="#section-5.4-15.2.1.2.1" class="pilcrow">¶</a></p>
+<p id="section-5.4-15.2.1.2.2">
+         While reconsidering the trade-offs represented by such
+         decision, we conclude that the drawbacks of the aforementioned mitigation outweigh the possible benefits, as specified in the updated text.<a href="#section-5.4-15.2.1.2.2" class="pilcrow">¶</a></p>
+<p id="section-5.4-15.2.1.2.3"></p>
+</li>
+            </ul>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="ras">
+<section id="section-5.5">
+        <h3 id="name-conveying-information-in-ro">
+<a href="#section-5.5" class="section-number selfRef">5.5. </a><a href="#name-conveying-information-in-ro" class="section-name selfRef">Conveying Information in Router Advertisement (RA) Messages</a>
+        </h3>
+<p id="section-5.5-1">Intentionally omitting information in Router Advertisements may prevent the propagation of such information, and may represent a challenge for hosts that need to infer whether they have received a complete set of SLAAC configuration information. As a result, this section recommends that, to the extent that is possible, RA messages contain a complete set of SLAAC information.<a href="#section-5.5-1" class="pilcrow">¶</a></p>
+<p id="section-5.5-2">This document replaces the following text from Section 6.2.3 of <span>[<a href="#RFC4861" class="cite xref">RFC4861</a>]</span>:<a href="#section-5.5-2" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-5.5-3">
+          <dt id="section-5.5-3.1"></dt>
+          <dd style="margin-left: 1.5em" id="section-5.5-3.2">
+   A router MAY choose not to include some or all options when sending
+   unsolicited Router Advertisements.  For example, if prefix lifetimes
+   are much longer than AdvDefaultLifetime, including them every few
+   advertisements may be sufficient.  However, when responding to a
+   Router Solicitation or while sending the first few initial
+   unsolicited advertisements, a router SHOULD include all options so
+   that all information (e.g., prefixes) is propagated quickly during
+   system initialization.<a href="#section-5.5-3.2" class="pilcrow">¶</a>
+</dd>
+          <dd class="break"></dd>
+<dt id="section-5.5-3.3"></dt>
+          <dd style="margin-left: 1.5em" id="section-5.5-3.4">
+   If including all options causes the size of an advertisement to
+   exceed the link MTU, multiple advertisements can be sent, each
+   containing a subset of the options.<a href="#section-5.5-3.4" class="pilcrow">¶</a>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="section-5.5-4">
+
+with:<a href="#section-5.5-4" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="section-5.5-5">
+          <dt id="section-5.5-5.1"></dt>
+          <dd style="margin-left: 1.5em" id="section-5.5-5.2">
+            <p id="section-5.5-5.2.1">
+A router SHOULD include all options in a single Router Advertisement.
+However, there are scenarios when routers MAY split the information between multiple RAs.
+In particular:<a href="#section-5.5-5.2.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-5.5-5.2.2.1">
+                <p id="section-5.5-5.2.2.1.1">
+Routers MAY be explicitly or implicitly configured to send multiple RAs and split information between them. For example, a router could be configured to send information associated with different provisional domains <span>[<a href="#RFC7556" class="cite xref">RFC7556</a>]</span> in different RAs, or to send multiple RAs, one per VRRPv3 <span>[<a href="#RFC9568" class="cite xref">RFC9568</a>]</span> group.<a href="#section-5.5-5.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.5-5.2.2.2">
+                <p id="section-5.5-5.2.2.2.1">
+If including all options causes the size of an RA to exceed the link MTU, multiple RAs SHOULD be sent, each containing a subset of the options.
+Routers SHOULD whenever possible, split the information between the fewest possible number of RAs.<a href="#section-5.5-5.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<span class="break"></span><dl class="dlParallel" id="section-5.5-6">
+          <dt id="section-5.5-6.1">RATIONALE:</dt>
+          <dd style="margin-left: 1.5em" id="section-5.5-6.2">
+            <ul class="normal">
+<li class="normal" id="section-5.5-6.2.1.1">
+                <p id="section-5.5-6.2.1.1.1">Sending information in the smallest possible number of packets was somewhat already implied by the original text in <span>[<a href="#RFC4861" class="cite xref">RFC4861</a>]</span>. Including all options when sending RAs leads to simpler code (as opposed to dealing with special cases where specific information is intentionally omitted), helps hosts infer when they have received a complete set of SLAAC configuration information, and reduces the probability of hosts learning only a partial subset of SLAAC configuration information. Note that while <span>[<a href="#RFC4861" class="cite xref">RFC4861</a>]</span> allowed some RAs to omit some options, to the best of the authors' knowledge, all SLAAC router implementations  always send all options in the smallest possible number of packets. Therefore, this section simply aligns the protocol specifications with existing implementation practice.<a href="#section-5.5-6.2.1.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-5.5-6.2.1.2">
+                <p id="section-5.5-6.2.1.2.1">
+However in some scenarios (including, but not limited to multihoming or having a router providing information from multiple configuration or provisional domains (PvD) to non-PvD-aware hosts) it might be desirable to send multiple sets of network configuration information in multiple RAs.<a href="#section-5.5-6.2.1.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</dd>
+        <dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+<section id="section-6">
+      <h2 id="name-iana-considerations">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-6-1">
+This document has no actions for IANA.<a href="#section-6-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-7">
+      <h2 id="name-implementation-status">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-implementation-status" class="section-name selfRef">Implementation Status</a>
+      </h2>
+<p id="section-7-1">[NOTE: This section is to be removed by the RFC-Editor before this document is published as an RFC.]<a href="#section-7-1" class="pilcrow">¶</a></p>
+<p id="section-7-2">This section summarizes the implementation status of the updates proposed in this document. In some cases, they correspond to variants of the mitigations proposed in this document (e.g., use of reduced default lifetimes for PIOs, albeit using different values than those recommended in this document). In such cases, we believe these implementations signal the intent to deal with the problems described in <span>[<a href="#RFC8978" class="cite xref">RFC8978</a>]</span> while lacking any guidance on the best possible approach to do it.<a href="#section-7-2" class="pilcrow">¶</a></p>
+<div id="impl-timers">
+<section id="section-7.1">
+        <h3 id="name-more-appropriate-lifetime-v">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-more-appropriate-lifetime-v" class="section-name selfRef">More Appropriate Lifetime Values</a>
+        </h3>
+<div id="impl-router-config">
+<section id="section-7.1.1">
+          <h4 id="name-router-configuration-variab">
+<a href="#section-7.1.1" class="section-number selfRef">7.1.1. </a><a href="#name-router-configuration-variab" class="section-name selfRef">Router Configuration Variables</a>
+          </h4>
+<section id="section-7.1.1.1">
+            <h5 id="name-rad8">
+<a href="#section-7.1.1.1" class="section-number selfRef">7.1.1.1. </a><a href="#name-rad8" class="section-name selfRef">rad(8)</a>
+            </h5>
+<p id="section-7.1.1.1-1">We have produced a patch for OpenBSD's rad(8) <span>[<a href="#rad" class="cite xref">rad</a>]</span> that employs reduced lifetimes for Neighbor Discovery options, as recommended in this document. The patch is available at: &lt;https://www.gont.com.ar/code/fgont-patch-rad-pio-lifetimes.txt&gt;.<a href="#section-7.1.1.1-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-7.1.1.2">
+            <h5 id="name-radvd8">
+<a href="#section-7.1.1.2" class="section-number selfRef">7.1.1.2. </a><a href="#name-radvd8" class="section-name selfRef">radvd(8)</a>
+            </h5>
+<p id="section-7.1.1.2-1">The radvd(8) daemon <span>[<a href="#radvd" class="cite xref">radvd</a>]</span>, normally employed by Linux-based router implementations, currently employs different default lifetimes than those recommended in <span>[<a href="#RFC4861" class="cite xref">RFC4861</a>]</span>. radvd(8) employs the following default values <span>[<a href="#radvd.conf" class="cite xref">radvd.conf</a>]</span>:<a href="#section-7.1.1.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7.1.1.2-2.1">
+                <p id="section-7.1.1.2-2.1.1">Preferred Lifetime: 14400 seconds (4 hours)<a href="#section-7.1.1.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-7.1.1.2-2.2">
+                <p id="section-7.1.1.2-2.2.1">Valid Lifetime: 86400 seconds (1 day)<a href="#section-7.1.1.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+<p id="section-7.1.1.2-3">These values do not follow the recommendations in this document, but nevertheless represent a deviation and improvement from the current standards.<a href="#section-7.1.1.2-3" class="pilcrow">¶</a></p>
+</section>
+</section>
+</div>
+</section>
+</div>
+<div id="impl-sig-stale-config">
+<section id="section-7.2">
+        <h3 id="name-honor-small-pio-valid-lifeti">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-honor-small-pio-valid-lifeti" class="section-name selfRef">Honor Small PIO Valid Lifetimes</a>
+        </h3>
+<section id="section-7.2.1">
+          <h4 id="name-linux-kernel">
+<a href="#section-7.2.1" class="section-number selfRef">7.2.1. </a><a href="#name-linux-kernel" class="section-name selfRef">Linux Kernel</a>
+          </h4>
+<p id="section-7.2.1-1">A Linux kernel implementation ohas been committed to the net-next tree. The implementation was produced in April 2020 by Fernando Gont &lt;fgont@si6networks.com&gt;. The corresponding patch can be found at: &lt;https://patchwork.ozlabs.org/project/netdev/patch/20200419122457.GA971@archlinux-current.localdomain/&gt;<a href="#section-7.2.1-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-7.2.2">
+          <h4 id="name-networkmanager">
+<a href="#section-7.2.2" class="section-number selfRef">7.2.2. </a><a href="#name-networkmanager" class="section-name selfRef">NetworkManager</a>
+          </h4>
+<p id="section-7.2.2-1">NetworkManager <span>[<a href="#NetworkManager" class="cite xref">NetworkManager</a>]</span> processes RA messages with a Valid Lifetime less than 2 hours as recommended in this document.<a href="#section-7.2.2-1" class="pilcrow">¶</a></p>
+</section>
+</section>
+</div>
+<div id="impl-ras">
+<section id="section-7.3">
+        <h3 id="name-conveying-information-in-rou">
+<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-conveying-information-in-rou" class="section-name selfRef">Conveying Information in Router Advertisement (RA) Messages</a>
+        </h3>
+<p id="section-7.3-1">We know of no implementation that splits network configuration information into multiple RA messages.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="impl-stale-config">
+<section id="section-7.4">
+        <h3 id="name-recovery-from-stale-configu">
+<a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-recovery-from-stale-configu" class="section-name selfRef">Recovery from Stale Configuration Information without Explicit Signaling</a>
+        </h3>
+<section id="section-7.4.1">
+          <h4 id="name-dhcpcd8">
+<a href="#section-7.4.1" class="section-number selfRef">7.4.1. </a><a href="#name-dhcpcd8" class="section-name selfRef">dhcpcd(8)</a>
+          </h4>
+<p id="section-7.4.1-1">The dhcpcd(8) daemon <span>[<a href="#dhcpcd" class="cite xref">dhcpcd</a>]</span>, a user-space SLAAC implementation employed by some Linux-based and BSD-derived operating systems, will set the Preferred Lifetime of addresses corresponding to a given prefix to 0 when a single RA from the router that previously advertised the prefix fails to advertise the corresponding prefix. However, it does not affect the corresponding Valid Lifetime. Therefore, it can be considered a partial implementation of this feature.<a href="#section-7.4.1-1" class="pilcrow">¶</a></p>
+</section>
+</section>
+</div>
+<section id="section-7.5">
+        <h3 id="name-other-mitigations-implement">
+<a href="#section-7.5" class="section-number selfRef">7.5. </a><a href="#name-other-mitigations-implement" class="section-name selfRef">Other mitigations implemented in products</a>
+        </h3>
+<p id="section-7.5-1"><span>[<a href="#FRITZ" class="cite xref">FRITZ</a>]</span> is a Customer Edge Router that tries to deprecate stale prefixes by advertising stale prefixes with a Preferred Lifetime of 0, and a Valid Lifetime of 2 hours (or less). There are two things to note with respect to this implementation:<a href="#section-7.5-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7.5-2.1">
+            <p id="section-7.5-2.1.1">Rather than recording prefixes on stable storage (as recommended in <span>[<a href="#RFC9096" class="cite xref">RFC9096</a>]</span>), this implementation checks the source address of IPv6 packets, and assumes that usage of any address that does not correspond to a prefix currently-advertised by the Customer Edge Router is the result of stale network configuration information. Hence, upon receipt of a packet that employs a source address that does not correspond to a currently-advertised prefix, this implementation will start advertising the corresponding prefix with small lifetimes, with the intent of deprecating it.<a href="#section-7.5-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-7.5-2.2">
+            <p id="section-7.5-2.2.1">Possibly as a result of item "e)" (pp. 19-20) from Section 5.5.3 of <span>[<a href="#RFC4862" class="cite xref">RFC4862</a>]</span> (discussed in <a href="#sig-stale-config" class="auto internal xref">Section 5.4</a> of this document), upon first occurrence of a stale prefix, this implementation will employ a decreasing Valid Lifetime, starting from 2 hours (7200 seconds), as opposed to a Valid Lifetime of 0.<a href="#section-7.5-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</section>
+<section id="section-8">
+      <h2 id="name-security-considerations">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-8-1">The protocol update in <a href="#sig-stale-config" class="auto internal xref">Section 5.4</a> could allow an on-link
+         attacker to perform a Denial of Service attack against local hosts,
+         by sending a forged RA with a PIO with a Valid Lifetime of 0.
+         Upon receipt of that packet, local hosts would invalidate the
+         corresponding prefix, and therefore remove any addresses
+         configured for that prefix, possibly terminating e.g. associated TCP
+         connections. However, an attacker may
+         achieve similar effects via a number other Neighbor Discovery (ND) attack
+         vectors, such as directing traffic to a non-existing node until 
+         ongoing TCP connections time out,
+         or performing a ND-based man-in-the-middle (MITM) attack and
+         subsequently forging TCP RST segments to cause on-going TCP
+         connections to be reset. Thus, for all practical purposes,
+         this attack vector does not really represent any greater risk
+         than other ND attack vectors. As noted in <a href="#sig-stale-config" class="auto internal xref">Section 5.4</a> , in scenarios where RA-based attacks
+         are of concern, proper
+         mitigations such as RA-Guard <span>[<a href="#RFC6105" class="cite xref">RFC6105</a>]</span> <span>[<a href="#RFC7113" class="cite xref">RFC7113</a>]</span> or SEND <span>[<a href="#RFC3971" class="cite xref">RFC3971</a>]</span> should be
+         implemented.<a href="#section-8-1" class="pilcrow">¶</a></p>
+</section>
+<section id="section-9">
+      <h2 id="name-acknowledgments">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+      </h2>
+<p id="section-9-1">The authors would like to thank (in alphabetical order) Mikael Abrahamsson, Tore Anderson, Luis Balbinot, Brian Carpenter, Lorenzo Colitti, Owen DeLong, Gert Doering, Thomas Haller, Nick Hilliard, Bob Hinden, Philip Homburg, Lee Howard, Christian Huitema, Tatuya Jinmei, Erik Kline, Ted Lemon,Albert Manfredi, Roy Marples, Florian Obser, Jordi Palet Martinez, Michael Richardson, Hiroki Sato, Mark Smith, Hannes Frederic Sowa, Dave Thaler, Tarko Tikan, Ole Troan, Eduard Vasilenko, and Loganaden Velvindron, for providing valuable comments on earlier versions of this document.<a href="#section-9-1" class="pilcrow">¶</a></p>
+<p id="section-9-2">Fernando would like to thank Alejandro D'Egidio and Sander Steffann for a discussion of these issues, which led to the publication of <span>[<a href="#RFC8978" class="cite xref">RFC8978</a>]</span>, and eventually to this document.<a href="#section-9-2" class="pilcrow">¶</a></p>
+<p id="section-9-3">Fernando would also like to thank Brian Carpenter who, over the years, has answered many questions and provided valuable comments that has benefited his protocol-related work.<a href="#section-9-3" class="pilcrow">¶</a></p>
+</section>
+<section id="section-10">
+      <h2 id="name-references">
+<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<section id="section-10.1">
+        <h3 id="name-normative-references">
+<a href="#section-10.1" class="section-number selfRef">10.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc2119">https://www.rfc-editor.org/info/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4861">[RFC4861]</dt>
+        <dd>
+<span class="refAuthor">Narten, T.</span>, <span class="refAuthor">Nordmark, E.</span>, <span class="refAuthor">Simpson, W.</span>, and <span class="refAuthor">H. Soliman</span>, <span class="refTitle">"Neighbor Discovery for IP version 6 (IPv6)"</span>, <span class="seriesInfo">RFC 4861</span>, <span class="seriesInfo">DOI 10.17487/RFC4861</span>, <time datetime="2007-09" class="refDate">September 2007</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc4861">https://www.rfc-editor.org/info/rfc4861</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4862">[RFC4862]</dt>
+        <dd>
+<span class="refAuthor">Thomson, S.</span>, <span class="refAuthor">Narten, T.</span>, and <span class="refAuthor">T. Jinmei</span>, <span class="refTitle">"IPv6 Stateless Address Autoconfiguration"</span>, <span class="seriesInfo">RFC 4862</span>, <span class="seriesInfo">DOI 10.17487/RFC4862</span>, <time datetime="2007-09" class="refDate">September 2007</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc4862">https://www.rfc-editor.org/info/rfc4862</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7556">[RFC7556]</dt>
+        <dd>
+<span class="refAuthor">Anipko, D., Ed.</span>, <span class="refTitle">"Multiple Provisioning Domain Architecture"</span>, <span class="seriesInfo">RFC 7556</span>, <span class="seriesInfo">DOI 10.17487/RFC7556</span>, <time datetime="2015-06" class="refDate">June 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc7556">https://www.rfc-editor.org/info/rfc7556</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7772">[RFC7772]</dt>
+        <dd>
+<span class="refAuthor">Yourtchenko, A.</span> and <span class="refAuthor">L. Colitti</span>, <span class="refTitle">"Reducing Energy Consumption of Router Advertisements"</span>, <span class="seriesInfo">BCP 202</span>, <span class="seriesInfo">RFC 7772</span>, <span class="seriesInfo">DOI 10.17487/RFC7772</span>, <time datetime="2016-02" class="refDate">February 2016</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc7772">https://www.rfc-editor.org/info/rfc7772</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+      <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8174">https://www.rfc-editor.org/info/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+<section id="section-10.2">
+        <h3 id="name-informative-references">
+<a href="#section-10.2" class="section-number selfRef">10.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="dhcpcd">[dhcpcd]</dt>
+        <dd>
+<span class="refAuthor">Marples, R.</span>, <span class="refTitle">"dhcpcd - a DHCP client"</span>, <span>&lt;<a href="https://roy.marples.name/projects/dhcpcd/">https://roy.marples.name/projects/dhcpcd/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="FRITZ">[FRITZ]</dt>
+        <dd>
+<span class="refAuthor">Gont, F.</span>, <span class="refTitle">"Quiz: Weird IPv6 Traffic on the Local Network (updated with solution)"</span>, <span class="seriesInfo">SI6 Networks Blog</span>, <time datetime="2016-02" class="refDate">February 2016</time>, <span>&lt;<a href="https://www.si6networks.com/2016/02/16/quiz-weird-ipv6-traffic-on-the-local-network-updated-with-solution/">https://www.si6networks.com/2016/02/16/quiz-weird-ipv6-traffic-on-the-local-network-updated-with-solution/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="IPNG-minutes">[IPNG-minutes]</dt>
+        <dd>
+<span class="refAuthor">IETF</span>, <span class="refTitle">"IPNG working group (ipngwg) Meeting Minutes"</span>, <span class="seriesInfo">Proceedings of the thirty-eightt Internet Engineering Task Force </span>, <time datetime="1997-04" class="refDate">April 1997</time>, <span>&lt;<a href="https://www.ietf.org/proceedings/38/97apr-final/xrtftr47.htm">https://www.ietf.org/proceedings/38/97apr-final/xrtftr47.htm</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="NetworkManager">[NetworkManager]</dt>
+        <dd>
+<span class="refAuthor">NetworkManager</span>, <span class="refTitle">"NetworkManager web site"</span>, <span>&lt;<a href="https://wiki.gnome.org/Projects/NetworkManager">https://wiki.gnome.org/Projects/NetworkManager</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="rad">[rad]</dt>
+        <dd>
+<span class="refAuthor">Obser, F.</span>, <span class="refTitle">"OpenBSD Router Advertisement Daemon - rad(8)"</span>, <span>&lt;<a href="https://cvsweb.openbsd.org/src/usr.sbin/rad/">https://cvsweb.openbsd.org/src/usr.sbin/rad/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="radvd">[radvd]</dt>
+        <dd>
+<span class="refAuthor">Hawkins, R.</span> and <span class="refAuthor">R. Johnson</span>, <span class="refTitle">"Linux IPv6 Router Advertisement Daemon (radvd)"</span>, <span>&lt;<a href="http://www.litech.org/radvd/">http://www.litech.org/radvd/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="radvd.conf">[radvd.conf]</dt>
+        <dd>
+<span class="refAuthor">Hawkins, R.</span> and <span class="refAuthor">R. Johnson</span>, <span class="refTitle">"radvd.conf - configuration file of the router advertisement daemon"</span>, <span>&lt;<a href="https://github.com/reubenhwk/radvd/blob/master/radvd.conf.5.man">https://github.com/reubenhwk/radvd/blob/master/radvd.conf.5.man</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC1971">[RFC1971]</dt>
+        <dd>
+<span class="refAuthor">Thomson, S.</span> and <span class="refAuthor">T. Narten</span>, <span class="refTitle">"IPv6 Stateless Address Autoconfiguration"</span>, <span class="seriesInfo">RFC 1971</span>, <span class="seriesInfo">DOI 10.17487/RFC1971</span>, <time datetime="1996-08" class="refDate">August 1996</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc1971">https://www.rfc-editor.org/info/rfc1971</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC3756">[RFC3756]</dt>
+        <dd>
+<span class="refAuthor">Nikander, P., Ed.</span>, <span class="refAuthor">Kempf, J.</span>, and <span class="refAuthor">E. Nordmark</span>, <span class="refTitle">"IPv6 Neighbor Discovery (ND) Trust Models and Threats"</span>, <span class="seriesInfo">RFC 3756</span>, <span class="seriesInfo">DOI 10.17487/RFC3756</span>, <time datetime="2004-05" class="refDate">May 2004</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc3756">https://www.rfc-editor.org/info/rfc3756</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC3971">[RFC3971]</dt>
+        <dd>
+<span class="refAuthor">Arkko, J., Ed.</span>, <span class="refAuthor">Kempf, J.</span>, <span class="refAuthor">Zill, B.</span>, and <span class="refAuthor">P. Nikander</span>, <span class="refTitle">"SEcure Neighbor Discovery (SEND)"</span>, <span class="seriesInfo">RFC 3971</span>, <span class="seriesInfo">DOI 10.17487/RFC3971</span>, <time datetime="2005-03" class="refDate">March 2005</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc3971">https://www.rfc-editor.org/info/rfc3971</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4191">[RFC4191]</dt>
+        <dd>
+<span class="refAuthor">Draves, R.</span> and <span class="refAuthor">D. Thaler</span>, <span class="refTitle">"Default Router Preferences and More-Specific Routes"</span>, <span class="seriesInfo">RFC 4191</span>, <span class="seriesInfo">DOI 10.17487/RFC4191</span>, <time datetime="2005-11" class="refDate">November 2005</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc4191">https://www.rfc-editor.org/info/rfc4191</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6105">[RFC6105]</dt>
+        <dd>
+<span class="refAuthor">Levy-Abegnoli, E.</span>, <span class="refAuthor">Van de Velde, G.</span>, <span class="refAuthor">Popoviciu, C.</span>, and <span class="refAuthor">J. Mohacsi</span>, <span class="refTitle">"IPv6 Router Advertisement Guard"</span>, <span class="seriesInfo">RFC 6105</span>, <span class="seriesInfo">DOI 10.17487/RFC6105</span>, <time datetime="2011-02" class="refDate">February 2011</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc6105">https://www.rfc-editor.org/info/rfc6105</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7113">[RFC7113]</dt>
+        <dd>
+<span class="refAuthor">Gont, F.</span>, <span class="refTitle">"Implementation Advice for IPv6 Router Advertisement Guard (RA-Guard)"</span>, <span class="seriesInfo">RFC 7113</span>, <span class="seriesInfo">DOI 10.17487/RFC7113</span>, <time datetime="2014-02" class="refDate">February 2014</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc7113">https://www.rfc-editor.org/info/rfc7113</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8106">[RFC8106]</dt>
+        <dd>
+<span class="refAuthor">Jeong, J.</span>, <span class="refAuthor">Park, S.</span>, <span class="refAuthor">Beloeil, L.</span>, and <span class="refAuthor">S. Madanapalli</span>, <span class="refTitle">"IPv6 Router Advertisement Options for DNS Configuration"</span>, <span class="seriesInfo">RFC 8106</span>, <span class="seriesInfo">DOI 10.17487/RFC8106</span>, <time datetime="2017-03" class="refDate">March 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8106">https://www.rfc-editor.org/info/rfc8106</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8415">[RFC8415]</dt>
+        <dd>
+<span class="refAuthor">Mrugalski, T.</span>, <span class="refAuthor">Siodelski, M.</span>, <span class="refAuthor">Volz, B.</span>, <span class="refAuthor">Yourtchenko, A.</span>, <span class="refAuthor">Richardson, M.</span>, <span class="refAuthor">Jiang, S.</span>, <span class="refAuthor">Lemon, T.</span>, and <span class="refAuthor">T. Winters</span>, <span class="refTitle">"Dynamic Host Configuration Protocol for IPv6 (DHCPv6)"</span>, <span class="seriesInfo">RFC 8415</span>, <span class="seriesInfo">DOI 10.17487/RFC8415</span>, <time datetime="2018-11" class="refDate">November 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8415">https://www.rfc-editor.org/info/rfc8415</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8978">[RFC8978]</dt>
+        <dd>
+<span class="refAuthor">Gont, F.</span>, <span class="refAuthor">Žorž, J.</span>, and <span class="refAuthor">R. Patterson</span>, <span class="refTitle">"Reaction of IPv6 Stateless Address Autoconfiguration (SLAAC) to Flash-Renumbering Events"</span>, <span class="seriesInfo">RFC 8978</span>, <span class="seriesInfo">DOI 10.17487/RFC8978</span>, <time datetime="2021-03" class="refDate">March 2021</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8978">https://www.rfc-editor.org/info/rfc8978</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9096">[RFC9096]</dt>
+        <dd>
+<span class="refAuthor">Gont, F.</span>, <span class="refAuthor">Žorž, J.</span>, <span class="refAuthor">Patterson, R.</span>, and <span class="refAuthor">B. Volz</span>, <span class="refTitle">"Improving the Reaction of Customer Edge Routers to IPv6 Renumbering Events"</span>, <span class="seriesInfo">BCP 234</span>, <span class="seriesInfo">RFC 9096</span>, <span class="seriesInfo">DOI 10.17487/RFC9096</span>, <time datetime="2021-08" class="refDate">August 2021</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc9096">https://www.rfc-editor.org/info/rfc9096</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9568">[RFC9568]</dt>
+      <dd>
+<span class="refAuthor">Lindem, A.</span> and <span class="refAuthor">A. Dogra</span>, <span class="refTitle">"Virtual Router Redundancy Protocol (VRRP) Version 3 for IPv4 and IPv6"</span>, <span class="seriesInfo">RFC 9568</span>, <span class="seriesInfo">DOI 10.17487/RFC9568</span>, <time datetime="2024-04" class="refDate">April 2024</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc9568">https://www.rfc-editor.org/info/rfc9568</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</section>
+<div id="expression">
+<section id="appendix-A">
+      <h2 id="name-selecting-neighbor-discover">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-selecting-neighbor-discover" class="section-name selfRef">Selecting Neighbor Discovery Lifetimes</a>
+      </h2>
+<p id="appendix-A-1">Many default values in from the Neighbor Discovery specification assume fairly reliable communication of Neighbor Discovery messages. However, as noted in <span>[<a href="#RFC7772" class="cite xref">RFC7772</a>]</span>, communication of multicasted RA messages tends to be rather unreliable for battery-powered devices, which tend to drop many of such messages to reduce the associated effects on power consumption. The following equation may be employed to override the default values of ND_RAS_PREFERRED and ND_RAS_VALID from <a href="#timers" class="auto internal xref">Section 5.1</a>, by computing the number of RA messages that a router should send, such that, given an RA-message loss rate of "Loss", there is a probability of "P" that at least one of such messages is received by the target hosts:<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<div class="alignCenter art-text artwork" id="appendix-A-2">
+<pre>
+n &gt;= ln(1 - P)/ln(Loss)
+</pre><a href="#appendix-A-2" class="pilcrow">¶</a>
+</div>
+<span class="break"></span><dl class="dlNewline" id="appendix-A-3">
+        <dt id="appendix-A-3.1">NOTES:</dt>
+        <dd style="margin-left: 1.5em" id="appendix-A-3.2">
+As noted in Section 6.2.4 of <span>[<a href="#RFC4861" class="cite xref">RFC4861</a>]</span>, RA messages are retransmitted with uniformly distributed random interval between the interface's configured MinRtrAdvInterval and MaxRtrAdvInterval. Thus, the equation above represents the worst-case scenario, where each RA message is retransmitted at MaxRtrAdvInterval seconds.<a href="#appendix-A-3.2" class="pilcrow">¶</a>
+</dd>
+        <dd class="break"></dd>
+<dt id="appendix-A-3.3"></dt>
+        <dd style="margin-left: 1.5em" id="appendix-A-3.4">
+It should be evident that, if the default values of ND_RAS_PREFERRED and ND_RAS_VALID from <a href="#timers" class="auto internal xref">Section 5.1</a> are overridden, this may affect the resulting ND_PREFERRED_LIFETIME and ND_VALID_LIFETIME values, unless the default value of MaxRtrAdvInterval is also overridden in the opposite direction accordingly.<a href="#appendix-A-3.4" class="pilcrow">¶</a>
+</dd>
+      <dd class="break"></dd>
+</dl>
+<p id="appendix-A-4">The following table tabulates the value of P (probability of receiving at least one RA message) for a combination of "n" (number of RA messages sent) and Loss (Loss rate for multicasted RA messages):<a href="#appendix-A-4" class="pilcrow">¶</a></p>
+<span id="name-sample-values-for-p-1-lossn"></span><div id="cat-table">
+<table class="center" id="table-1">
+        <caption>
+<a href="#table-1" class="selfRef">Table 1</a>:
+<a href="#name-sample-values-for-p-1-lossn" class="selfRef">Sample values for P = 1 - (Loss)^n</a>
+        </caption>
+<tbody>
+          <tr>
+            <td class="text-center" rowspan="1" colspan="1">n / Loss</td>
+            <td class="text-center" rowspan="1" colspan="1">0.10</td>
+            <td class="text-center" rowspan="1" colspan="1">0.20</td>
+            <td class="text-center" rowspan="1" colspan="1">0.30</td>
+            <td class="text-center" rowspan="1" colspan="1">0.40</td>
+            <td class="text-center" rowspan="1" colspan="1">0.50</td>
+            <td class="text-center" rowspan="1" colspan="1">0.60</td>
+            <td class="text-center" rowspan="1" colspan="1">0.70</td>
+            <td class="text-center" rowspan="1" colspan="1">0.80</td>
+            <td class="text-center" rowspan="1" colspan="1">0.90</td>
+            <td class="text-center" rowspan="1" colspan="1">0.95</td>
+          </tr>
+          <tr>
+            <td class="text-center" rowspan="1" colspan="1">3</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99900</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99200</td>
+            <td class="text-center" rowspan="1" colspan="1">0.97300</td>
+            <td class="text-center" rowspan="1" colspan="1">0.93600</td>
+            <td class="text-center" rowspan="1" colspan="1">0.87500</td>
+            <td class="text-center" rowspan="1" colspan="1">0.78400</td>
+            <td class="text-center" rowspan="1" colspan="1">0.65700</td>
+            <td class="text-center" rowspan="1" colspan="1">0.48800</td>
+            <td class="text-center" rowspan="1" colspan="1">0.27100</td>
+            <td class="text-center" rowspan="1" colspan="1">0.14263</td>
+          </tr>
+          <tr>
+            <td class="text-center" rowspan="1" colspan="1">4</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99990</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99840</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99190</td>
+            <td class="text-center" rowspan="1" colspan="1">0.97440</td>
+            <td class="text-center" rowspan="1" colspan="1">0.93750</td>
+            <td class="text-center" rowspan="1" colspan="1">0.87040</td>
+            <td class="text-center" rowspan="1" colspan="1">0.75990</td>
+            <td class="text-center" rowspan="1" colspan="1">0.59040</td>
+            <td class="text-center" rowspan="1" colspan="1">0.34390</td>
+            <td class="text-center" rowspan="1" colspan="1">0.18549</td>
+          </tr>
+          <tr>
+            <td class="text-center" rowspan="1" colspan="1">5</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99999</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99968</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99757</td>
+            <td class="text-center" rowspan="1" colspan="1">0.98976</td>
+            <td class="text-center" rowspan="1" colspan="1">0.96875</td>
+            <td class="text-center" rowspan="1" colspan="1">0.92224</td>
+            <td class="text-center" rowspan="1" colspan="1">0.83193</td>
+            <td class="text-center" rowspan="1" colspan="1">0.67232</td>
+            <td class="text-center" rowspan="1" colspan="1">0.40951</td>
+            <td class="text-center" rowspan="1" colspan="1">0.46856</td>
+          </tr>
+          <tr>
+            <td class="text-center" rowspan="1" colspan="1">6</td>
+            <td class="text-center" rowspan="1" colspan="1">1.00000</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99994</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99927</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99590</td>
+            <td class="text-center" rowspan="1" colspan="1">0.98437</td>
+            <td class="text-center" rowspan="1" colspan="1">0.95334</td>
+            <td class="text-center" rowspan="1" colspan="1">0.88235</td>
+            <td class="text-center" rowspan="1" colspan="1">0.73786</td>
+            <td class="text-center" rowspan="1" colspan="1">0.46856</td>
+            <td class="text-center" rowspan="1" colspan="1">0.26491</td>
+          </tr>
+          <tr>
+            <td class="text-center" rowspan="1" colspan="1">7</td>
+            <td class="text-center" rowspan="1" colspan="1">1.00000</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99999</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99978</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99836</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99219</td>
+            <td class="text-center" rowspan="1" colspan="1">0.97201</td>
+            <td class="text-center" rowspan="1" colspan="1">0.91765</td>
+            <td class="text-center" rowspan="1" colspan="1">0.79028</td>
+            <td class="text-center" rowspan="1" colspan="1">0.52170</td>
+            <td class="text-center" rowspan="1" colspan="1">0.30166</td>
+          </tr>
+          <tr>
+            <td class="text-center" rowspan="1" colspan="1">8</td>
+            <td class="text-center" rowspan="1" colspan="1">1.00000</td>
+            <td class="text-center" rowspan="1" colspan="1">1.00000</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99993</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99934</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99609</td>
+            <td class="text-center" rowspan="1" colspan="1">0.98320</td>
+            <td class="text-center" rowspan="1" colspan="1">0.94235</td>
+            <td class="text-center" rowspan="1" colspan="1">0.83223</td>
+            <td class="text-center" rowspan="1" colspan="1">0.56953</td>
+            <td class="text-center" rowspan="1" colspan="1">0.33658</td>
+          </tr>
+          <tr>
+            <td class="text-center" rowspan="1" colspan="1">9</td>
+            <td class="text-center" rowspan="1" colspan="1">1.00000</td>
+            <td class="text-center" rowspan="1" colspan="1">1.00000</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99998</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99974</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99805</td>
+            <td class="text-center" rowspan="1" colspan="1">0.98992</td>
+            <td class="text-center" rowspan="1" colspan="1">0.95965</td>
+            <td class="text-center" rowspan="1" colspan="1">0.86578</td>
+            <td class="text-center" rowspan="1" colspan="1">0.61258</td>
+            <td class="text-center" rowspan="1" colspan="1">0.36975</td>
+          </tr>
+          <tr>
+            <td class="text-center" rowspan="1" colspan="1">10</td>
+            <td class="text-center" rowspan="1" colspan="1">1.00000</td>
+            <td class="text-center" rowspan="1" colspan="1">1.00000</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99999</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99989</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99902</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99395</td>
+            <td class="text-center" rowspan="1" colspan="1">0.97175</td>
+            <td class="text-center" rowspan="1" colspan="1">0.89263</td>
+            <td class="text-center" rowspan="1" colspan="1">0.65132</td>
+            <td class="text-center" rowspan="1" colspan="1">0.40126</td>
+          </tr>
+          <tr>
+            <td class="text-center" rowspan="1" colspan="1">11</td>
+            <td class="text-center" rowspan="1" colspan="1">1.00000</td>
+            <td class="text-center" rowspan="1" colspan="1">1.00000</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99999</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99995</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99951</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99637</td>
+            <td class="text-center" rowspan="1" colspan="1">0.98022</td>
+            <td class="text-center" rowspan="1" colspan="1">0.91410</td>
+            <td class="text-center" rowspan="1" colspan="1">0.68618</td>
+            <td class="text-center" rowspan="1" colspan="1">0.43119</td>
+          </tr>
+          <tr>
+            <td class="text-center" rowspan="1" colspan="1">12</td>
+            <td class="text-center" rowspan="1" colspan="1">1.00000</td>
+            <td class="text-center" rowspan="1" colspan="1">1.00000</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99999</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99998</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99975</td>
+            <td class="text-center" rowspan="1" colspan="1">0.99782</td>
+            <td class="text-center" rowspan="1" colspan="1">0.98615</td>
+            <td class="text-center" rowspan="1" colspan="1">0.93128</td>
+            <td class="text-center" rowspan="1" colspan="1">0.71757</td>
+            <td class="text-center" rowspan="1" colspan="1">0.45963</td>
+          </tr>
+        </tbody>
+      </table>
+</div>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-B">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Fernando Gont</span></div>
+<div dir="auto" class="left"><span class="org">SI6 Networks</span></div>
+<div dir="auto" class="left"><span class="street-address">Segurola y Habana 4310, 7mo Piso</span></div>
+<div dir="auto" class="left"><span class="locality">Villa Devoto</span></div>
+<div dir="auto" class="left"><span class="region">Ciudad Autonoma de Buenos Aires</span></div>
+<div dir="auto" class="left"><span class="country-name">Argentina</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:fgont@si6networks.com" class="email">fgont@si6networks.com</a>
+</div>
+<div class="url">
+<span>URI:</span>
+<a href="https://www.si6networks.com" class="url">https://www.si6networks.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Jan Zorz</span></div>
+<div dir="auto" class="left"><span class="org">6connect</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:jan@6connect.com" class="email">jan@6connect.com</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Richard Patterson</span></div>
+<div dir="auto" class="left"><span class="org">Sky UK</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:richard.patterson@sky.uk" class="email">richard.patterson@sky.uk</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Jen Linkova (<span class="role">editor</span>)</span></div>
+<div dir="auto" class="left"><span class="org">Google</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:furry13@gmail.com" class="email">furry13@gmail.com</a>, <a href="mailto:furry@google.com" class="email">furry@google.com</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
